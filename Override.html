@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OVERRIDE // BREACH PROTOCOL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<style>
+:root{
+  --bg:#050708;
+  --bg2:#0a1214;
+  --panel:#0b1416;
+  --line:#123b40;
+  --cyan:#00eaff;
+  --cyan-dim:#0b6b78;
+  --orange:#ff8a3d;
+  --green:#3dffb0;
+  --red:#ff3b5c;
+  --text:#d8f5ff;
+  --dim:#527885;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);}
+body{
+  font-family:'Consolas','Courier New',monospace;
+  color:var(--text);
+  overflow-x:hidden;
+  min-height:100vh;
+  position:relative;
+  background-image:
+    repeating-linear-gradient(60deg, rgba(0,234,255,0.035) 0px, rgba(0,234,255,0.035) 1px, transparent 1px, transparent 46px),
+    repeating-linear-gradient(-60deg, rgba(0,234,255,0.035) 0px, rgba(0,234,255,0.035) 1px, transparent 1px, transparent 46px),
+    repeating-linear-gradient(0deg, rgba(0,234,255,0.02) 0px, rgba(0,234,255,0.02) 1px, transparent 1px, transparent 46px);
+  background-attachment:fixed;
+}
+#crt{
+  pointer-events:none;position:fixed;inset:0;z-index:999;
+  background:repeating-linear-gradient(to bottom, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 2px, transparent 3px);
+  mix-blend-mode:overlay;
+}
+#vignette{pointer-events:none;position:fixed;inset:0;z-index:998;box-shadow:inset 0 0 200px 50px rgba(0,0,0,0.8);}
+#app{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:16px 16px 60px;min-height:100vh;}
+::selection{background:var(--cyan);color:#00131f;}
+a{color:var(--cyan);}
+
+#toastbox{position:fixed;top:14px;right:14px;z-index:1200;display:flex;flex-direction:column;gap:8px;max-width:300px;}
+.toast{background:#08191b;border:1px solid var(--orange);border-left:4px solid var(--orange);padding:10px 12px;border-radius:3px;font-size:12px;animation:toastIn .4s ease, toastOut .4s ease 3.6s forwards;box-shadow:0 4px 18px rgba(0,0,0,.5);}
+.toast b{color:var(--orange);display:block;font-size:11px;letter-spacing:1px;margin-bottom:2px;text-transform:uppercase;}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+@keyframes toastOut{to{opacity:0;transform:translateX(30px);}}
+
+.hud{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:18px;}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand svg{filter:drop-shadow(0 0 8px rgba(0,234,255,0.55));}
+.brand-text h1{margin:0;font-size:21px;letter-spacing:4px;color:#eafcff;text-shadow:0 0 10px rgba(0,234,255,.6);}
+.brand-text .tag{font-size:10px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
+.hud-right{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+.stat{font-size:11px;color:var(--dim);text-align:right;letter-spacing:1px;}
+.stat b{display:block;color:var(--text);font-size:13px;letter-spacing:1px;}
+.rankpill{border:1px solid var(--cyan-dim);color:var(--cyan);padding:5px 10px;border-radius:3px;font-size:11px;letter-spacing:1px;background:rgba(0,234,255,0.06);white-space:nowrap;}
+.iconbtn{border:1px solid var(--line);background:transparent;color:var(--dim);font-size:11px;padding:6px 10px;border-radius:3px;cursor:pointer;letter-spacing:1px;}
+.iconbtn:hover{color:var(--cyan);border-color:var(--cyan-dim);}
+
+@keyframes glitch{
+  0%,92%,100%{transform:translate(0,0);text-shadow:0 0 10px rgba(0,234,255,.6);}
+  93%{transform:translate(-1px,1px);text-shadow:2px 0 var(--red), -2px 0 var(--cyan);}
+  95%{transform:translate(1px,-1px);text-shadow:-2px 0 var(--red), 2px 0 var(--cyan);}
+  97%{transform:translate(0,0);text-shadow:0 0 10px rgba(0,234,255,.6);}
+}
+.brand-text h1{animation:glitch 6s infinite;}
+
+.meter-wrap{margin-bottom:20px;}
+.meter-label{display:flex;justify-content:space-between;font-size:11px;letter-spacing:1px;color:var(--dim);margin-bottom:5px;text-transform:uppercase;}
+.meter-label span.val{color:var(--text);font-weight:bold;}
+.meter{position:relative;height:16px;border:1px solid var(--line);border-radius:2px;background:#040a0b;overflow:hidden;}
+.meter-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--orange) 60%,var(--red) 92%);transition:width .5s ease;}
+.meter-threshold{position:absolute;top:0;bottom:0;left:75%;width:2px;background:var(--red);box-shadow:0 0 6px var(--red);}
+.meter.alarm{animation:alarmPulse 1s infinite;}
+@keyframes alarmPulse{0%,100%{box-shadow:0 0 0px rgba(255,59,92,0);}50%{box-shadow:0 0 18px 2px rgba(255,59,92,0.8);}}
+
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:16px;margin-bottom:16px;animation:fadeIn .4s ease;position:relative;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.panel h2{margin:0 0 10px;font-size:14px;letter-spacing:2px;color:var(--cyan);text-transform:uppercase;border-left:3px solid var(--cyan);padding-left:8px;}
+.panel p{font-size:13px;line-height:1.6;color:var(--text);}
+.muted{color:var(--dim);}
+
+.btn{font-family:inherit;font-size:12px;letter-spacing:1px;text-transform:uppercase;background:transparent;color:var(--cyan);border:1px solid var(--cyan-dim);padding:11px 14px;border-radius:3px;cursor:pointer;transition:.15s;margin:4px 6px 4px 0;}
+.btn:hover:not(:disabled){background:rgba(0,234,255,0.12);border-color:var(--cyan);}
+.btn:disabled{opacity:.3;cursor:not-allowed;}
+.btn.primary{background:var(--cyan);color:#00131f;font-weight:bold;border-color:var(--cyan);}
+.btn.primary:hover:not(:disabled){background:#6ff2ff;}
+.btn.danger{border-color:#7a2530;color:var(--red);}
+.btn.danger:hover:not(:disabled){background:rgba(255,59,92,0.12);}
+.btn.ghost{border-color:var(--line);color:var(--dim);}
+
+.roles{display:flex;gap:14px;flex-wrap:wrap;}
+.role-card{flex:1;min-width:240px;border:1px solid var(--line);background:var(--bg2);border-radius:4px;padding:16px;cursor:pointer;transition:.2s;}
+.role-card:hover{border-color:var(--cyan);transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.4);}
+.role-card h3{margin:0 0 6px;letter-spacing:1px;font-size:15px;}
+.role-card.white h3{color:#9fe8ff;}
+.role-card.red h3{color:#ff8a93;}
+.role-card ul{margin:10px 0 0;padding-left:16px;font-size:12px;color:var(--dim);line-height:1.7;}
+.role-card ul li b{color:var(--text);}
+
+.nodemap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.node-chip{flex:1;min-width:120px;text-align:center;border:1px solid var(--line);border-radius:4px;padding:10px 6px;font-size:11px;letter-spacing:.5px;background:var(--bg2);position:relative;overflow:hidden;}
+.node-chip .n-name{display:block;font-size:12px;margin-bottom:4px;color:var(--text);}
+.node-chip .n-status{font-size:10px;text-transform:uppercase;letter-spacing:1px;}
+.node-chip.locked{opacity:.4;}
+.node-chip.locked .n-status{color:var(--dim);}
+.node-chip.active{border-color:var(--cyan);box-shadow:0 0 10px rgba(0,234,255,.35);}
+.node-chip.active .n-status{color:var(--cyan);}
+.node-chip.done{border-color:var(--green);}
+.node-chip.done .n-status{color:var(--green);}
+.node-arrow{color:var(--dim);font-size:16px;}
+.target-lock::before,.target-lock::after{content:"";position:absolute;width:14px;height:14px;border-color:var(--cyan);border-style:solid;z-index:2;}
+.target-lock::before{top:-1px;left:-1px;border-width:2px 0 0 2px;}
+.target-lock::after{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
+.scan-sweep{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.scan-sweep::after{content:"";position:absolute;top:-60%;left:-30%;width:36%;height:220%;background:linear-gradient(100deg,transparent,rgba(0,234,255,0.18),transparent);animation:sweep 2.4s linear infinite;}
+@keyframes sweep{from{transform:translateX(-40%);}to{transform:translateX(420%);}}
+
+.node-detail{border-top:1px dashed var(--line);margin-top:10px;padding-top:12px;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;}
+.tag{font-size:10px;padding:3px 8px;border-radius:10px;border:1px solid var(--line);color:var(--dim);letter-spacing:.5px;text-transform:uppercase;}
+.tag.on{color:var(--green);border-color:#1c4a33;background:rgba(61,255,176,.06);}
+
+.terminal{background:#03090a;border:1px solid var(--line);border-radius:4px;padding:12px 14px;height:240px;overflow-y:auto;font-size:12px;line-height:1.65;}
+.terminal .line{opacity:0;animation:typeIn .3s forwards;}
+@keyframes typeIn{from{opacity:0;transform:translateX(-4px);}to{opacity:1;transform:translateX(0);}}
+.t-sys{color:var(--dim);} .t-ok{color:var(--green);} .t-warn{color:var(--orange);} .t-bad{color:var(--red);} .t-info{color:var(--cyan);} .t-cmd{color:#fff;} .t-data{color:#8be9ff;}
+.terminal::-webkit-scrollbar{width:8px;} .terminal::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+
+.cmdline{display:flex;align-items:center;gap:8px;margin-top:10px;border:1px solid var(--cyan-dim);border-radius:3px;padding:10px 12px;background:#03090a;}
+.cmdline span{color:var(--cyan);}
+.cmdline input{flex:1;background:transparent;border:none;outline:none;color:#fff;font-family:inherit;font-size:14px;letter-spacing:.5px;}
+.hint{font-size:11px;color:var(--dim);margin-top:8px;}
+.hint b{color:var(--orange);}
+
+.xpbar{height:8px;border:1px solid var(--line);border-radius:2px;background:#040a0b;overflow:hidden;margin-top:4px;}
+.xpbar-fill{height:100%;background:linear-gradient(90deg,var(--cyan-dim),var(--cyan));transition:width .6s ease;}
+
+.center-screen{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.big-status{font-size:26px;letter-spacing:4px;margin-bottom:6px;}
+.big-status.fail{color:var(--red);text-shadow:0 0 16px rgba(255,59,92,.6);animation:flicker 1.4s infinite;}
+.big-status.win{color:var(--green);text-shadow:0 0 16px rgba(61,255,176,.5);}
+@keyframes flicker{0%,19%,21%,23%,80%,100%{opacity:1;}20%,22%,24%{opacity:.4;}}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:18px 0;max-width:560px;width:100%;}
+.summary-grid div{background:var(--bg2);border:1px solid var(--line);border-radius:4px;padding:10px;}
+.summary-grid .k{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;}
+.summary-grid .v{font-size:17px;color:var(--text);margin-top:3px;}
+
+.ladder{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:14px 0 22px;}
+.rank-step{font-size:10px;padding:5px 9px;border-radius:3px;border:1px solid var(--line);color:var(--dim);letter-spacing:.5px;}
+.rank-step.reached{color:var(--cyan);border-color:var(--cyan-dim);background:rgba(0,234,255,.07);}
+.rank-step.current{color:#00131f;background:var(--cyan);border-color:var(--cyan);font-weight:bold;}
+
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;}
+.ach-card{border:1px solid var(--line);background:var(--bg2);border-radius:4px;padding:12px;}
+.ach-card.unlocked{border-color:var(--cyan-dim);}
+.ach-card.locked{opacity:.45;}
+.ach-card h4{margin:0 0 4px;font-size:12px;letter-spacing:1px;color:var(--cyan);}
+.ach-card.locked h4{color:var(--dim);}
+.ach-card p{font-size:11px;margin:0;color:var(--dim);}
+
+.sentinel-panel{border-color:var(--red)!important;box-shadow:0 0 24px rgba(255,59,92,.25);}
+.sentinel-panel h2{color:var(--red);border-left-color:var(--red);}
+
+footer.note{margin-top:30px;text-align:center;font-size:10px;color:var(--dim);letter-spacing:1px;}
+
+@media (max-width:640px){
+  #app{padding:10px 10px 50px;}
+  .brand-text h1{font-size:16px;letter-spacing:2px;}
+  .brand svg{width:36px;height:36px;}
+  .hud{gap:8px;}
+  .hud-right{gap:8px;width:100%;justify-content:space-between;}
+  .stat{text-align:left;}
+  .panel{padding:12px;}
+  .panel h2{font-size:12px;}
+  .role-card{min-width:100%;}
+  .node-chip{min-width:90px;font-size:10px;padding:8px 4px;}
+  .node-chip .n-name{font-size:10px;}
+  .terminal{height:200px;font-size:11px;}
+  .summary-grid{grid-template-columns:repeat(2,1fr);}
+  .big-status{font-size:19px;letter-spacing:2px;}
+  .cmdline input{font-size:16px;} /* avoid ios zoom */
+}
+</style>
+</head>
+<body>
+<div id="crt"></div>
+<div id="vignette"></div>
+<div id="toastbox"></div>
+<div id="app"></div>
+
+<script>
+/* =====================================================================
+   OVERRIDE // BREACH PROTOCOL
+   A fictional, terminal-driven network-intrusion simulation. All targets,
+   organizations, the "LATTICE" AI grid, intel, vulnerabilities and
+   commands are simulated for gameplay only - no real exploit code,
+   working malware, or genuine intrusion techniques are represented.
+===================================================================== */
+
+const DETECTION_THRESHOLD = 75;
+
+const RANKS = [
+  {name:"Script Kiddie",   min:0},
+  {name:"Novice Hacker",   min:140},
+  {name:"Hacker",          min:340},
+  {name:"Skilled Hacker",  min:620},
+  {name:"Elite Hacker",    min:980},
+  {name:"MasterHacker",    min:1450},
+];
+
+const ROLE_STATS = {
+  white:{
+    label:"White Hat",
+    stealthCharges:20,
+    stealthEffectMult:1.3,
+    detMult:0.60,
+    successAdj:10,
+    xpMult:1.05,
+    perks:[
+      "20 Stealth charges — far more effective at erasing your trace",
+      "-40% detection gained from every action",
+      "+10% success chance on Penetrate / Hack Terminal commands",
+      "Cleanest exit profile in the field"
+    ]
+  },
+  red:{
+    label:"Red Hat",
+    stealthCharges:15,
+    stealthEffectMult:0.75,
+    detMult:0.85,
+    successAdj:22,
+    xpMult:1.30,
+    perks:[
+      "15 Stealth charges — noticeably weaker, aggression leaves a trail",
+      "+22% success chance on Penetrate / Hack Terminal commands",
+      "+30% bonus XP per compromise",
+      "Faster, harder-hitting, but louder operations"
+    ]
+  }
+};
+
+const MISSIONS = [
+  {
+    name:"MERIDIAN TRUST BANK", env:"Financial Network",
+    briefWhite:"Meridian Trust hired your firm after an audit flagged unlogged access on their trading backend. Full authorization, tight window.",
+    briefRed:"Meridian Trust is quietly laundering dark money through shell accounts. Nobody hired you. Nobody knows you're coming.",
+    nodes:[{name:"Perimeter Firewall",defense:3},{name:"Transaction Gateway",defense:4},{name:"Core Ledger Vault",defense:6}]
+  },
+  {
+    name:"OBSIDIAN MEDIA GROUP", env:"Broadcast & Surveillance Network",
+    briefWhite:"Obsidian Media's newsroom systems were breached last month. They want a full assessment before it happens again for real.",
+    briefRed:"Obsidian Media is spiking stories that expose city corruption. Someone wants their spike list leaked to the public feed.",
+    nodes:[{name:"Studio Relay Node",defense:3},{name:"Broadcast Router",defense:5},{name:"Archive Vault",defense:6}]
+  },
+  {
+    name:"VOLT GRID AUTHORITY", env:"City Power Grid",
+    briefWhite:"Volt Grid Authority's substations run on decade-old firmware. City council approved a stress test before winter load hits.",
+    briefRed:"Volt Grid has been overbilling entire districts through a rigged smart-meter algorithm. Time to see the ledger for yourself.",
+    nodes:[{name:"Substation Controller",defense:4},{name:"Load Balancer AI",defense:6},{name:"Grid Command Core",defense:7}]
+  },
+  {
+    name:"PULSE TRAFFIC CONTROL", env:"Smart-City Traffic AI",
+    briefWhite:"Pulse Traffic Control manages every intersection in the city. A single stress test could prevent a real cascading failure.",
+    briefRed:"Pulse Traffic's predictive AI is quietly routing patrol drones ahead of protests before they're even scheduled.",
+    nodes:[{name:"Intersection Relay",defense:4},{name:"Fleet Dispatch Server",defense:5},{name:"Predictive Routing AI",defense:6},{name:"Traffic Command Core",defense:7}]
+  },
+  {
+    name:"HELIX BIOSYSTEMS", env:"Biotech Research Cloud",
+    briefWhite:"Helix Biosystems holds unreleased trial data ahead of a regulatory filing. They've requested a full-scope assessment.",
+    briefRed:"Helix buried an unfavorable trial result to protect their stock price. Somebody wants that data pulled into the light.",
+    nodes:[{name:"Cloud Ingress Node",defense:5},{name:"Lab Telemetry Hub",defense:6},{name:"Trial Records Server",defense:7},{name:"Genomic Vault",defense:8}]
+  },
+  {
+    name:"IRONVEIL DEFENSE DYNAMICS", env:"Military Contractor Network",
+    briefWhite:"A government contractor with a spotty security record. The board approved a red-team engagement after a near-miss last quarter.",
+    briefRed:"Ironveil sells surveillance hardware to regimes with complicated human rights records. Someone wants proof, extracted quietly.",
+    nodes:[{name:"Contractor VPN Gate",defense:6},{name:"Logistics Server",defense:7},{name:"Weapons Telemetry Hub",defense:8},{name:"Classified Archive",defense:9}]
+  },
+  {
+    name:"NEXUS SURVEILLANCE HUB", env:"Citywide Camera & Sensor Net",
+    briefWhite:"Nexus operates every public camera and sensor in the metro. Independent audit requested after a facial-recognition false-arrest scandal.",
+    briefRed:"Nexus quietly sells your face, your route home, and your routine to whoever pays. Time to see who's buying.",
+    nodes:[{name:"Sensor Aggregator",defense:6},{name:"Facial ID Cluster",defense:7},{name:"Behavior Prediction Engine",defense:8},{name:"Nexus Command Root",defense:9}]
+  },
+  {
+    name:"AXIOM AI LABS", env:"Autonomous Systems R&D",
+    briefWhite:"Axiom AI Labs is finalizing an autonomous decision-making system for citywide deployment. Final assessment before go-live.",
+    briefRed:"Axiom's new model was trained on data nobody consented to give. Time to find out what it really knows.",
+    nodes:[{name:"Research Gateway",defense:7},{name:"Model Training Cluster",defense:8},{name:"Decision Engine Core",defense:9},{name:"AXIOM Root Directive",defense:10}]
+  },
+];
+
+const ACHIEVEMENTS = [
+  {id:"first_breach", name:"First Breach", desc:"Compromise your first node.", hidden:false},
+  {id:"ghost_protocol", name:"Ghost Protocol", desc:"Clear a network without detection ever exceeding 25%.", hidden:false},
+  {id:"iron_nerves", name:"Iron Nerves", desc:"Clear a network after detection exceeded 65% at some point.", hidden:false},
+  {id:"network_cleared", name:"Network Cleared", desc:"Complete every network in the campaign.", hidden:false},
+  {id:"masterhacker", name:"Apex Predator", desc:"Reach MasterHacker rank.", hidden:false},
+  {id:"terminal_adept", name:"Terminal Adept", desc:"Execute 10 commands through the Access Terminal.", hidden:false},
+  {id:"checkmate", name:"Checkmate", desc:"Defeat SENTINEL in the bonus round.", hidden:false},
+  {id:"ghost_machine", name:"Ghost In The Machine", desc:"???", hidden:true},
+];
+
+/* ---- Fictional "famous" penetration & hack technique commands ---- */
+const PENETRATE_COMMANDS = {
+  bruteforce:   {label:"Brute Force Login",      det:[9,15],  succAdj:0},
+  sqlinject:    {label:"SQL Injection",          det:[10,16], succAdj:3},
+  bypassauth:   {label:"Auth Bypass Exploit",    det:[8,14],  succAdj:-4},
+  exploitcve:   {label:"CVE Exploit Chain",      det:[11,17], succAdj:6},
+  sessionhijack:{label:"Session Hijack",         det:[9,15],  succAdj:1},
+};
+const HACK_COMMANDS = {
+  phishing:  {label:"Spear-Phishing Payload",   det:[16,24], succAdj:5},
+  malware:   {label:"Malware Deployment",       det:[18,26], succAdj:2},
+  inject:    {label:"Remote Code Injection",    det:[17,25], succAdj:4},
+  rootkit:   {label:"Rootkit Installation",     det:[19,27], succAdj:-2},
+  trojan:    {label:"Trojan Payload Drop",      det:[17,25], succAdj:0},
+};
+const INTEL_FIELDS = ["IP Address","Username","Internal Subnet","Linked Document","Password Hash Fragment","Active Session Token"];
+const PORT_POOL = ["22/tcp — ssh","80/tcp — http","443/tcp — https","3306/tcp — mysql","8080/tcp — proxy","21/tcp — ftp","445/tcp — smb","5432/tcp — postgres"];
+const DOC_POOL = ["internal_memo_q3.docx","access_policy_draft.pdf","incident_report_2024.xlsx","backup_credentials.txt","org_chart_confidential.pdf"];
+
+const state = {
+  screen:"boot",
+  role:null,
+  xp:0,
+  detection:0,
+  missionMaxDetection:0,
+  stealthUses:0,
+  maxStealthUses:0,
+  missionIndex:0,
+  currentTpl:null,
+  nodes:[],
+  activeNode:0,
+  logs:[],
+  totalActions:0,
+  missionsCleared:0,
+  achievements:new Set(),
+  termCmdCount:0,
+  bonusRound:false,
+  sentinelLastActions:[],
+  sentinelAdaptBonus:0,
+};
+
+function rand(min,max){ return Math.random()*(max-min)+min; }
+function clamp(v,lo,hi){ return Math.max(lo, Math.min(hi, v)); }
+function pick(arr){ return arr[Math.floor(rand(0,arr.length))]; }
+function shuffled(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(rand(0,i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function currentRank(xp){ let r=RANKS[0]; for(const s of RANKS){ if(xp>=s.min) r=s; } return r; }
+function nextRankInfo(xp){ const i=RANKS.findIndex(r=>r.name===currentRank(xp).name); return i===RANKS.length-1?null:RANKS[i+1]; }
+function roleMods(){ return ROLE_STATS[state.role]; }
+
+function log(text,type){
+  state.logs.push({text, type:type||"t-sys"});
+  if(state.logs.length>250) state.logs.shift();
+}
+
+function toast(title,text){
+  const box = document.getElementById("toastbox");
+  const d = document.createElement("div");
+  d.className="toast";
+  d.innerHTML = `<b>${title}</b>${text}`;
+  box.appendChild(d);
+  setTimeout(()=>{ d.remove(); }, 4200);
+}
+
+function unlock(id){
+  if(state.achievements.has(id)) return;
+  state.achievements.add(id);
+  const a = ACHIEVEMENTS.find(x=>x.id===id);
+  toast("Achievement Unlocked", a.name);
+  log(`ACHIEVEMENT UNLOCKED: ${a.name}`, "t-warn");
+}
+
+/* ---------------- MISSION SETUP ---------------- */
+function buildMission(idx){
+  const tpl = MISSIONS[idx % MISSIONS.length];
+  const nodes = tpl.nodes.map((n,i)=>({
+    id:i, name:n.name, defense:n.defense,
+    discovered:false, vulnKnown:false, penetrated:false, compromised:false,
+  }));
+  return {tpl, nodes};
+}
+
+function startMission(idx){
+  const {tpl,nodes} = buildMission(idx);
+  state.currentTpl = tpl;
+  state.nodes = nodes;
+  state.activeNode = 0;
+  state.detection = 0;
+  state.missionMaxDetection = 0;
+  state.stealthUses = state.maxStealthUses;
+  state.logs = [];
+  state.bonusRound = false;
+  log(`CONNECTING TO TARGET NETWORK: ${tpl.name}...`, "t-sys");
+  log(`VPN chain established through 4 relays. Origin spoofed. Environment: ${tpl.env}.`, "t-info");
+  log(`Type 'help' at any time to see available terminal commands.`, "t-info");
+  state.screen = "mission";
+  render();
+}
+
+function startBonusRound(){
+  state.bonusRound = true;
+  state.currentTpl = {
+    name:"SENTINEL-9", env:"Autonomous Counter-Intrusion AI",
+    briefWhite:"A rogue instance of the LATTICE's core defense AI has gone fully autonomous. Command wants it contained, not destroyed.",
+    briefRed:"SENTINEL-9 has been hunting hacktivists across the city. It's learned your patterns before. This time it's personal."
+  };
+  state.nodes = [{id:0,name:"SENTINEL AI CORE",defense:9,discovered:false,vulnKnown:false,penetrated:false,compromised:false}];
+  state.activeNode = 0;
+  state.detection = 0;
+  state.missionMaxDetection = 0;
+  state.stealthUses = state.maxStealthUses;
+  state.logs = [];
+  state.sentinelLastActions = [];
+  state.sentinelAdaptBonus = 0;
+  log("WARNING: Unidentified adaptive defense signature detected.", "t-bad");
+  log("SENTINEL-9 is watching your traffic in real time. It learns.", "t-warn");
+  state.screen = "mission";
+  render();
+}
+
+/* ---------------- CORE MECHANICS ---------------- */
+function addDetection(amount){
+  const m = roleMods();
+  const applied = amount*m.detMult;
+  state.detection = clamp(state.detection+applied,0,100);
+  state.missionMaxDetection = Math.max(state.missionMaxDetection, state.detection);
+  maybePassiveSweep();
+  checkGameOver();
+}
+
+function maybePassiveSweep(){
+  state.totalActions++;
+  const freq = state.bonusRound ? 1 : 3;
+  if(state.totalActions % freq === 0){
+    const bump = state.bonusRound ? rand(3,7) : rand(1,3);
+    state.detection = clamp(state.detection+bump,0,100);
+    state.missionMaxDetection = Math.max(state.missionMaxDetection, state.detection);
+    log(state.bonusRound
+      ? `SENTINEL actively probes your connection (+${bump.toFixed(1)}%)`
+      : `IDS passive sweep detects anomalous traffic pattern (+${bump.toFixed(1)}%)`, "t-warn");
+  }
+}
+
+function checkGameOver(){
+  if(state.detection >= DETECTION_THRESHOLD){
+    state.screen = "gameover";
+  }
+}
+
+function node(){ return state.nodes[state.activeNode]; }
+
+function trackSentinelPattern(actionType){
+  if(!state.bonusRound) return;
+  state.sentinelLastActions.push(actionType);
+  if(state.sentinelLastActions.length>3) state.sentinelLastActions.shift();
+  const last = state.sentinelLastActions;
+  if(last.length>=2 && last[last.length-1]===last[last.length-2]){
+    state.sentinelAdaptBonus = Math.min(state.sentinelAdaptBonus+2, 6);
+    log(`SENTINEL anticipated your ${actionType.toUpperCase()} pattern. Adapting defenses.`, "t-bad");
+  } else {
+    state.sentinelAdaptBonus = Math.max(state.sentinelAdaptBonus-1, 0);
+  }
+}
+
+function effectiveDefense(n){
+  return n.defense + (state.bonusRound ? state.sentinelAdaptBonus : 0);
+}
+
+/* ---- SCAN: ports / public docs, detection scales with security rating, sometimes silent ---- */
+function doScan(){
+  const n = node();
+  if(n.discovered){ log("Node already scanned.", "t-sys"); render(); return; }
+  n.discovered = true;
+  trackSentinelPattern("scan");
+  const def = effectiveDefense(n);
+  log(`Running port + service scan on ${n.name}...`, "t-sys");
+
+  const numPorts = Math.round(rand(2,5));
+  const ports = shuffled(PORT_POOL).slice(0,numPorts);
+  ports.forEach(p=>log(`  open door: ${p}`, "t-data"));
+
+  if(rand(0,100) < clamp(45-def*2,10,60)){
+    const doc = pick(DOC_POOL);
+    log(`  public document indexed: ${doc}`, "t-data");
+  }
+
+  const alarmChance = clamp(30+def*5,15,90);
+  if(rand(0,100) < alarmChance){
+    const d = 1.5+def*0.4+rand(0,2);
+    log(`Scan brushed against a monitored port. Minor alarm raised.`, "t-warn");
+    addDetection(d);
+  } else {
+    log(`Scan completed silently. No alarms triggered.`, "t-ok");
+  }
+  render();
+}
+
+/* ---- RECON: intel detail revealed, inversely scaled with security rating ---- */
+function doRecon(){
+  const n = node();
+  if(!n.discovered){ log("Scan the node before running reconnaissance.", "t-bad"); render(); return; }
+  if(n.vulnKnown){ log("Reconnaissance already completed on this node.", "t-sys"); render(); return; }
+  n.vulnKnown = true;
+  trackSentinelPattern("recon");
+  const def = effectiveDefense(n);
+
+  const fraction = clamp(1 - def/11, 0.3, 1);
+  const revealCount = Math.max(1, Math.round(INTEL_FIELDS.length*fraction));
+  const fields = shuffled(INTEL_FIELDS).slice(0,revealCount);
+
+  log(`Cross-referencing ${n.name} fingerprint against known intel sources...`, "t-sys");
+  if(fields.includes("IP Address")) log(`  IP Address: 10.${Math.floor(rand(0,255))}.${Math.floor(rand(0,255))}.${Math.floor(rand(1,254))}`, "t-data");
+  if(fields.includes("Username")) log(`  Username: ${pick(["j.morales","a.chen","r.okafor","s.ivanova","d.reyes"])}`, "t-data");
+  if(fields.includes("Internal Subnet")) log(`  Internal Subnet: 172.${Math.floor(rand(16,31))}.${Math.floor(rand(0,255))}.0/24`, "t-data");
+  if(fields.includes("Linked Document")) log(`  Linked Document: ${pick(DOC_POOL)}`, "t-data");
+  if(fields.includes("Password Hash Fragment")) log(`  Password Hash Fragment: ${Math.random().toString(16).slice(2,10)}…`, "t-data");
+  if(fields.includes("Active Session Token")) log(`  Active Session Token: ${Math.random().toString(16).slice(2,12)}`, "t-data");
+
+  if(revealCount < INTEL_FIELDS.length){
+    log(`High security rating on this node concealed ${INTEL_FIELDS.length-revealCount} additional field(s).`, "t-warn");
+  } else {
+    log(`Low security rating exposed the full intel set.`, "t-warn");
+  }
+
+  const d = rand(3,6) + def*0.3;
+  addDetection(d);
+  log(`Detection risk increased from data pull (+${(d*roleMods().detMult).toFixed(1)}%)`, "t-warn");
+  render();
+}
+
+/* ---- STEALTH: role-dependent effectiveness ---- */
+function doStealth(){
+  if(state.stealthUses<=0){ log("No stealth charges remaining.", "t-bad"); render(); return; }
+  state.stealthUses--;
+  const m = roleMods();
+  const reduction = (rand(8,14)) * m.stealthEffectMult;
+  state.detection = clamp(state.detection-reduction,0,100);
+  trackSentinelPattern("stealth");
+  log(`Rerouting traffic, wiping session logs, going dark...`, "t-info");
+  log(`Trace level reduced by ${reduction.toFixed(1)}%. (${state.stealthUses} charges left)`, "t-ok");
+  render();
+}
+
+/* ---- PENETRATE: named technique commands, detection much higher than scan/recon ---- */
+function runPenetrate(cmdKey){
+  const n = node();
+  if(!n.discovered){ log("Scan the node before attempting penetration.", "t-bad"); render(); return; }
+  if(n.penetrated){ log("Foothold already established on this node.", "t-sys"); render(); return; }
+  const tech = PENETRATE_COMMANDS[cmdKey] || {label:"Manual Exploit Attempt", det:[9,15], succAdj:0};
+  const m = roleMods();
+  const def = effectiveDefense(n);
+  let chance = 55 + (n.vulnKnown?25:0) - def*3 + m.successAdj + tech.succAdj;
+  chance = clamp(chance,10,96);
+  const roll = rand(0,100);
+  trackSentinelPattern("penetrate");
+  log(`Executing ${tech.label} against ${n.name} (est. success ${chance.toFixed(0)}%)...`, "t-sys");
+  if(roll<=chance){
+    n.penetrated = true;
+    log(`Breach successful. Foothold established inside ${n.name}.`, "t-ok");
+    addDetection(rand(tech.det[0],tech.det[1]) + def*0.4);
+  } else {
+    log(`${tech.label} rejected. Connection reset by target.`, "t-bad");
+    addDetection(rand(tech.det[0]+5,tech.det[1]+6) + def*0.5);
+  }
+  render();
+}
+
+/* ---- HACK TERMINAL: social-engineering / injection commands, big but capped detection ---- */
+function runHack(cmdKey){
+  const n = node();
+  if(!n.penetrated){ log("Establish a foothold with a penetrate command first.", "t-bad"); render(); return; }
+  if(n.compromised){ log("Node already fully compromised.", "t-sys"); render(); return; }
+  const tech = HACK_COMMANDS[cmdKey] || {label:"Manual Terminal Takeover", det:[16,24], succAdj:0};
+  const m = roleMods();
+  const def = effectiveDefense(n);
+  let chance = 62 + m.successAdj + tech.succAdj - def*2;
+  chance = clamp(chance,12,97);
+  const roll = rand(0,100);
+  trackSentinelPattern("hack");
+  log(`Deploying ${tech.label} against ${n.name}...`, "t-sys");
+  if(roll<=chance){
+    n.compromised = true;
+    const xpGain = Math.round(n.defense*15*m.xpMult);
+    state.xp += xpGain;
+    log(`TERMINAL HACKED. ${n.name} fully compromised via ${tech.label}. +${xpGain} XP`, "t-ok");
+    if(!state.achievements.has("first_breach")) unlock("first_breach");
+    checkRankAchievements();
+    addDetection(rand(tech.det[0],tech.det[1]) + def*0.5);
+    advanceNode();
+  } else {
+    log(`${tech.label} failed. Security daemon restarted the shell.`, "t-bad");
+    addDetection(rand(tech.det[0]+6,tech.det[1]+8) + def*0.6);
+  }
+  render();
+}
+
+function checkRankAchievements(){
+  if(currentRank(state.xp).name==="MasterHacker") unlock("masterhacker");
+}
+
+function advanceNode(){
+  if(state.activeNode < state.nodes.length-1){
+    state.activeNode++;
+    log(`Pivoting deeper into the network...`, "t-info");
+  } else {
+    if(state.bonusRound){
+      unlock("checkmate");
+      state.screen = "sentinelwin";
+    } else {
+      state.missionsCleared++;
+      if(state.missionMaxDetection<=25) unlock("ghost_protocol");
+      if(state.missionMaxDetection>=65) unlock("iron_nerves");
+      state.screen = "missioncomplete";
+    }
+  }
+}
+
+/* ---------------- TERMINAL COMMAND PARSER ---------------- */
+function helpText(){
+  log(`General: scan, recon, stealth, status, nodes, clear, help`, "t-info");
+  log(`Penetrate techniques (need scan first): ${Object.keys(PENETRATE_COMMANDS).join(", ")}`, "t-info");
+  log(`Hack techniques (need a foothold): ${Object.keys(HACK_COMMANDS).join(", ")}`, "t-info");
+}
+
+function handleCommand(raw){
+  const cmd = raw.trim().toLowerCase();
+  if(cmd==="") return;
+  log(`root@override:~$ ${raw}`, "t-cmd");
+  state.termCmdCount++;
+  if(state.termCmdCount>=10) unlock("terminal_adept");
+
+  if(cmd==="override protocol"){
+    unlock("ghost_machine");
+    log("... ACCESS GRANTED. Something in the LATTICE just noticed you.", "t-warn");
+    render(); return;
+  }
+
+  if(cmd==="help"){ helpText(); render(); return; }
+  if(cmd==="scan"){ doScan(); return; }
+  if(cmd==="recon" || cmd==="reconnaissance"){ doRecon(); return; }
+  if(cmd==="stealth"){ doStealth(); return; }
+  if(cmd==="penetrate"){ runPenetrate(null); return; }
+  if(PENETRATE_COMMANDS[cmd]){ runPenetrate(cmd); return; }
+  if(cmd==="hack" || cmd==="hack terminal"){ runHack(null); return; }
+  if(HACK_COMMANDS[cmd]){ runHack(cmd); return; }
+
+  if(cmd==="status"){
+    log(`Trace level: ${state.detection.toFixed(1)}% / ${DETECTION_THRESHOLD}% · XP: ${Math.round(state.xp)} · Rank: ${currentRank(state.xp).name} · Stealth charges: ${state.stealthUses}`, "t-info");
+    render(); return;
+  }
+  if(cmd==="nodes"){
+    state.nodes.forEach((n,i)=>{
+      const st = n.compromised?"COMPROMISED":(i===state.activeNode?"ACTIVE":"LOCKED");
+      log(`[${i+1}] ${n.name} — ${st}`, "t-info");
+    });
+    render(); return;
+  }
+  if(cmd==="clear"){ state.logs = []; render(); return; }
+
+  log(`Unknown command: '${raw}'. Type 'help' for a list of available commands.`, "t-bad");
+  render();
+}
+
+/* ---------------- RENDERING ---------------- */
+function svgLogo(size){
+  return `<svg width="${size}" height="${size}" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="32,4 56,17 56,45 32,60 8,45 8,17" stroke="#00eaff" stroke-width="2" fill="rgba(0,234,255,0.06)"/>
+    <circle cx="32" cy="32" r="14" stroke="#ff8a3d" stroke-width="1.5" opacity="0.7"/>
+    <path d="M22 26 L30 34 L22 42" stroke="#3dffb0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <line x1="34" y1="42" x2="44" y2="42" stroke="#3dffb0" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="32" cy="32" r="3" fill="#00eaff"/>
+  </svg>`;
+}
+
+function meterColorClass(){ return state.detection>=DETECTION_THRESHOLD-15 ? "alarm" : ""; }
+
+function renderHUD(){
+  const rank = currentRank(state.xp);
+  const nr = nextRankInfo(state.xp);
+  const xpFloor = rank.min;
+  const xpCeil = nr ? nr.min : rank.min+400;
+  const pct = clamp(((state.xp-xpFloor)/(xpCeil-xpFloor))*100,0,100);
+  return `
+  <div class="hud">
+    <div class="brand">
+      ${svgLogo(46)}
+      <div class="brand-text">
+        <h1>OVERRIDE</h1>
+        <div class="tag">// Breach Protocol</div>
+      </div>
+    </div>
+    <div class="hud-right">
+      <div class="stat">ROLE<b>${state.role==="white"?"White Hat":state.role==="red"?"Red Hat":"—"}</b></div>
+      <div class="stat">XP<b>${Math.round(state.xp)}</b></div>
+      <div class="stat">STEALTH<b>${state.stealthUses}/${state.maxStealthUses}</b></div>
+      <div class="rankpill">${rank.name}</div>
+      <button class="iconbtn" onclick="app.openAchievements()">Achievements</button>
+    </div>
+  </div>
+  <div style="margin-bottom:10px;">
+    <div class="meter-label"><span>Rank Progress</span><span class="val">${nr? (nr.min-state.xp)+" XP to "+nr.name : "MAX RANK"}</span></div>
+    <div class="xpbar"><div class="xpbar-fill" style="width:${pct}%"></div></div>
+  </div>`;
+}
+
+function renderDetectionMeter(){
+  return `
+  <div class="meter-wrap">
+    <div class="meter-label"><span>Detection / Trace Level</span><span class="val">${state.detection.toFixed(1)}% (fail at ${DETECTION_THRESHOLD}%)</span></div>
+    <div class="meter ${meterColorClass()}">
+      <div class="meter-fill" style="width:${state.detection}%"></div>
+      <div class="meter-threshold"></div>
+    </div>
+  </div>`;
+}
+
+function renderTerminal(){
+  const lines = state.logs.map(l=>`<div class="line ${l.type}">&gt; ${l.text}</div>`).join("");
+  return `<div class="terminal" id="termbox">${lines}</div>`;
+}
+function scrollTerm(){ const t=document.getElementById("termbox"); if(t) t.scrollTop=t.scrollHeight; }
+
+function renderBoot(){
+  return `
+  <div class="center-screen">
+    ${svgLogo(90)}
+    <h1 style="letter-spacing:6px;margin:18px 0 4px;color:#eafcff;">OVERRIDE // BREACH PROTOCOL</h1>
+    <p class="muted" style="max-width:520px;">The city runs on the LATTICE — a sprawling, semi-autonomous network stitched into banks, media, power, traffic, and surveillance. You have a backdoor. What you do with it is yours to decide.</p>
+    <p class="muted" style="max-width:520px;font-size:11px;">A fictional network-intrusion simulation for entertainment and training purposes. Plays on desktop and mobile. All action happens through the in-game Access Terminal.</p>
+    <button class="btn primary" onclick="app.begin()" style="margin-top:20px;">Initialize Session</button>
+  </div>`;
+}
+
+function renderRoleSelect(){
+  const w = ROLE_STATS.white, r = ROLE_STATS.red;
+  return `
+  <div class="panel">
+    <h2>Select Operator Profile</h2>
+    <p class="muted">Your profile shapes your approach: precision and clean exits, or speed and force.</p>
+    <div class="roles">
+      <div class="role-card white" onclick="app.chooseRole('white')">
+        <h3>&#128737; WHITE HAT — Authorized Operative</h3>
+        <p class="muted" style="font-size:12px;">Contracted, precise, methodical.</p>
+        <ul>${w.perks.map(p=>`<li>${p}</li>`).join("")}</ul>
+      </div>
+      <div class="role-card red" onclick="app.chooseRole('red')">
+        <h3>&#9760; RED HAT — Vigilante Operative</h3>
+        <p class="muted" style="font-size:12px;">Uninvited, aggressive, fast.</p>
+        <ul>${r.perks.map(p=>`<li>${p}</li>`).join("")}</ul>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderNodeMap(){
+  return `<div class="nodemap">${state.nodes.map((n,i)=>{
+    let cls="locked", status="Locked";
+    if(n.compromised){ cls="done"; status="Compromised"; }
+    else if(i===state.activeNode){ cls="active target-lock"; status="In Progress"; }
+    const arrow = i<state.nodes.length-1 ? `<div class="node-arrow">›</div>` : "";
+    const sweep = i===state.activeNode ? `<div class="scan-sweep"></div>` : "";
+    return `<div class="node-chip ${cls}">${sweep}<span class="n-name">${n.name}</span><span class="n-status">${status}</span></div>${arrow}`;
+  }).join("")}</div>`;
+}
+
+function renderNodeDetail(){
+  const n = node();
+  const def = effectiveDefense(n);
+  return `
+  <div class="node-detail">
+    <h2 style="border:none;padding:0;margin-bottom:8px;">TARGET NODE: ${n.name} <span class="muted" style="font-size:11px;">(security rating ${def}/10${state.bonusRound && state.sentinelAdaptBonus>0 ? ' — adapted +'+state.sentinelAdaptBonus : ''})</span></h2>
+    <div class="tags">
+      <span class="tag ${n.discovered?'on':''}">${n.discovered?'✓ Scanned':'Not Scanned'}</span>
+      <span class="tag ${n.vulnKnown?'on':''}">${n.vulnKnown?'✓ Recon Done':'No Recon'}</span>
+      <span class="tag ${n.penetrated?'on':''}">${n.penetrated?'✓ Foothold':'Not Breached'}</span>
+    </div>
+    <div class="cmdline">
+      <span>&gt;</span>
+      <input id="cmdinput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type a command... e.g. scan, recon, sqlinject, malware, help" onkeydown="app.cmdKey(event)">
+    </div>
+    <div class="hint">Type <b>help</b> for the full command list. Scan → Recon → a Penetrate technique → a Hack technique, in order. Stealth can be used any time.</div>
+  </div>`;
+}
+
+function renderMission(){
+  const tpl = state.currentTpl;
+  const brief = state.role==="white"?tpl.briefWhite:tpl.briefRed;
+  return `
+  <div class="panel ${state.bonusRound?'sentinel-panel':''}">
+    <h2>${state.bonusRound? "BONUS ROUND: " : ("Mission "+(state.missionIndex+1)+": ")}${tpl.name}</h2>
+    <p class="muted" style="font-size:11px;text-transform:uppercase;letter-spacing:1px;">${tpl.env}</p>
+    <p>${brief}</p>
+    ${renderNodeMap()}
+    ${renderNodeDetail()}
+  </div>
+  ${renderDetectionMeter()}
+  <div class="panel">
+    <h2>Terminal Feed</h2>
+    ${renderTerminal()}
+  </div>
+  <div style="text-align:center;">
+    <button class="btn danger" onclick="app.abortMission()">Abort ${state.bonusRound?'Bonus Round':'Mission'} (retreat, no penalty)</button>
+  </div>`;
+}
+
+function renderMissionComplete(){
+  const rank = currentRank(state.xp);
+  const isFinal = state.missionIndex >= MISSIONS.length-1;
+  return `
+  <div class="center-screen">
+    <div class="big-status win">NETWORK FULLY COMPROMISED</div>
+    <p class="muted">${state.currentTpl.name} — all core nodes breached without triggering full lockdown.</p>
+    <div class="summary-grid">
+      <div><div class="k">Total XP</div><div class="v">${Math.round(state.xp)}</div></div>
+      <div><div class="k">Current Rank</div><div class="v">${rank.name}</div></div>
+      <div><div class="k">Networks Cleared</div><div class="v">${state.missionsCleared}</div></div>
+      <div><div class="k">Final Trace Level</div><div class="v">${state.detection.toFixed(0)}%</div></div>
+    </div>
+    <button class="btn primary" onclick="app.nextMission()">${isFinal? "Continue →" : "Access Next Network →"}</button>
+  </div>`;
+}
+
+function renderGameOver(){
+  const rank = currentRank(state.xp);
+  return `
+  <div class="center-screen">
+    <div class="big-status fail">CONNECTION TRACED</div>
+    <p class="muted">Your trace level crossed ${DETECTION_THRESHOLD}%. Automated countermeasures locked the session and flagged your relay chain. The operation is over.</p>
+    <div class="summary-grid">
+      <div><div class="k">XP Earned</div><div class="v">${Math.round(state.xp)}</div></div>
+      <div><div class="k">Final Rank</div><div class="v">${rank.name}</div></div>
+      <div><div class="k">Networks Cleared</div><div class="v">${state.missionsCleared}</div></div>
+      <div><div class="k">Role</div><div class="v">${state.role==="white"?"White Hat":"Red Hat"}</div></div>
+    </div>
+    ${renderLadder()}
+    <button class="btn primary" onclick="app.restart()">Start New Operation</button>
+  </div>`;
+}
+
+function renderCampaignComplete(){
+  const rank = currentRank(state.xp);
+  unlock("network_cleared");
+  return `
+  <div class="center-screen">
+    <div class="big-status win">CAMPAIGN COMPLETE</div>
+    <p class="muted">Every known network in this operation cycle has been breached.</p>
+    <div class="summary-grid">
+      <div><div class="k">Total XP</div><div class="v">${Math.round(state.xp)}</div></div>
+      <div><div class="k">Final Rank</div><div class="v">${rank.name}</div></div>
+      <div><div class="k">Networks Cleared</div><div class="v">${state.missionsCleared}</div></div>
+    </div>
+    ${renderLadder()}
+    <p class="muted" style="max-width:480px;">Deep in the LATTICE's core, analysts have flagged an anomaly — an adaptive defense AI that shouldn't exist. Command wants answers.</p>
+    <button class="btn danger" onclick="app.enterBonus()" style="margin-top:8px;">⚠ Engage Secret Bonus Round: SENTINEL-9</button>
+    <button class="btn ghost" onclick="app.restart()" style="margin-top:8px;">Start New Operation</button>
+  </div>`;
+}
+
+function renderSentinelWin(){
+  const rank = currentRank(state.xp);
+  return `
+  <div class="center-screen">
+    <div class="big-status win">SENTINEL-9 NEUTRALIZED</div>
+    <p class="muted">The adaptive AI's core has been fully compromised. Its learning model — and whatever it was really watching for — is now yours.</p>
+    <div class="summary-grid">
+      <div><div class="k">Total XP</div><div class="v">${Math.round(state.xp)}</div></div>
+      <div><div class="k">Final Rank</div><div class="v">${rank.name}</div></div>
+      <div><div class="k">Achievements</div><div class="v">${state.achievements.size}/${ACHIEVEMENTS.length}</div></div>
+    </div>
+    ${renderLadder()}
+    <button class="btn primary" onclick="app.restart()">Start New Operation</button>
+  </div>`;
+}
+
+function renderLadder(){
+  const rank = currentRank(state.xp);
+  return `<div class="ladder">${RANKS.map(r=>{
+    const cls = r.name===rank.name ? "current" : (state.xp>=r.min?"reached":"");
+    return `<div class="rank-step ${cls}">${r.name}</div>`;
+  }).join("")}</div>`;
+}
+
+function renderAchievements(){
+  return `
+  <div class="panel">
+    <h2>Achievements (${state.achievements.size}/${ACHIEVEMENTS.length})</h2>
+    <div class="ach-grid">
+      ${ACHIEVEMENTS.map(a=>{
+        const got = state.achievements.has(a.id);
+        const title = a.hidden && !got ? "??? Secret Achievement" : a.name;
+        const desc = a.hidden && !got ? "Keep exploring the Access Terminal..." : a.desc;
+        return `<div class="ach-card ${got?'unlocked':'locked'}"><h4>${got?'✓ ':''}${title}</h4><p>${desc}</p></div>`;
+      }).join("")}
+    </div>
+    <button class="btn" onclick="app.closeAchievements()" style="margin-top:14px;">Back</button>
+  </div>`;
+}
+
+function render(){
+  const appEl = document.getElementById("app");
+  let html = "";
+  if(state.screen!=="boot") html += renderHUD();
+  switch(state.screen){
+    case "boot": html += renderBoot(); break;
+    case "role": html += renderRoleSelect(); break;
+    case "mission": html += renderMission(); break;
+    case "missioncomplete": html += renderMissionComplete(); break;
+    case "gameover": html += renderGameOver(); break;
+    case "campaign": html += renderCampaignComplete(); break;
+    case "sentinelwin": html += renderSentinelWin(); break;
+    case "achievements": html += renderAchievements(); break;
+  }
+  html += `<footer class="note">SIMULATED ENVIRONMENT — no real network intrusion techniques are represented. For entertainment &amp; training purposes only.</footer>`;
+  appEl.innerHTML = html;
+  scrollTerm();
+  const inp = document.getElementById("cmdinput");
+  if(inp) inp.focus();
+}
+
+/* ---------------- APP CONTROLLER ---------------- */
+let prevScreen = "role";
+window.app = {
+  begin(){ state.screen="role"; render(); },
+  chooseRole(role){
+    state.role = role;
+    state.maxStealthUses = ROLE_STATS[role].stealthCharges;
+    state.stealthUses = state.maxStealthUses;
+    state.missionIndex = 0;
+    state.xp = 0;
+    state.missionsCleared = 0;
+    startMission(0);
+  },
+  cmdKey(ev){
+    if(ev.key==="Enter"){
+      const val = ev.target.value;
+      ev.target.value="";
+      handleCommand(val);
+    }
+  },
+  abortMission(){
+    log("Operator initiated manual disconnect. Session terminated cleanly.", "t-info");
+    state.screen = "role";
+    render();
+  },
+  nextMission(){
+    state.missionIndex++;
+    if(state.missionIndex >= MISSIONS.length){
+      state.screen = "campaign";
+      render();
+    } else {
+      startMission(state.missionIndex);
+    }
+  },
+  enterBonus(){ startBonusRound(); },
+  openAchievements(){ prevScreen = state.screen; state.screen="achievements"; render(); },
+  closeAchievements(){ state.screen = prevScreen; render(); },
+  restart(){
+    state.role=null; state.xp=0; state.detection=0; state.missionIndex=0;
+    state.missionsCleared=0; state.logs=[]; state.totalActions=0;
+    state.bonusRound=false;
+    state.screen="boot";
+    render();
+  }
+};
+
+render();
+</script>
+</body>
+</html>

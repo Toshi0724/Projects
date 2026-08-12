@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>CIPHER NOIR — Case Files</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Cinzel:wght@500;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#100d0b; --paper:#e9dfc6; --paper-dim:#cdbe94; --brass:#b8903f; --brass-bright:#eec475;
+  --rust:#963c28; --teal:#3c5a52; --shadow:#050403; --line: rgba(184,144,63,.32); --ok:#5c9a5c;
+  --steel:#7d8a92; --violet:#6b5c8f;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+html,body{margin:0;padding:0;height:100%;background:var(--ink);}
+body{font-family:'Crimson Pro', serif; color:var(--paper);
+  background:radial-gradient(ellipse at 20% -10%, rgba(184,144,63,.11), transparent 55%),
+    radial-gradient(ellipse at 90% 110%, rgba(60,90,82,.16), transparent 55%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px), var(--ink);
+  min-height:100vh; overflow-x:hidden;}
+.noise{position:fixed;inset:0;pointer-events:none;opacity:.045;z-index:999;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+h1,h2,h3{font-family:'Cinzel', serif; letter-spacing:.5px;}
+.mono{font-family:'Courier Prime', monospace;}
+button{font-family:inherit;cursor:pointer;}
+::selection{background:var(--brass);color:var(--ink);}
+::-webkit-scrollbar{width:9px;height:9px;} ::-webkit-scrollbar-thumb{background:var(--brass); border-radius:6px;} ::-webkit-scrollbar-track{background:transparent;}
+
+#app{position:relative;min-height:100vh;display:flex;flex-direction:column;}
+.screen{display:none;flex:1;flex-direction:column;animation:fadeIn .5s ease;}
+.screen.active{display:flex;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+.wrap{max-width:1040px;margin:0 auto;width:100%;padding:18px;flex:1;display:flex;flex-direction:column;}
+
+#screen-title{align-items:center;justify-content:center;text-align:center;min-height:100vh;position:relative;overflow:hidden;}
+.vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center, transparent 38%, rgba(0,0,0,.78) 100%);}
+.fog{position:absolute;inset:0;overflow:hidden;pointer-events:none;opacity:.55;}
+.fog span{position:absolute;bottom:-20%;width:60%;height:140%;border-radius:50%;background:radial-gradient(ellipse at center, rgba(184,144,63,.09), transparent 70%);animation:drift 22s linear infinite;}
+.fog span:nth-child(1){left:-10%; animation-duration:26s;}
+.fog span:nth-child(2){left:40%; animation-duration:34s; animation-delay:-8s; opacity:.6;}
+.fog span:nth-child(3){left:70%; animation-duration:20s; animation-delay:-4s;}
+@keyframes drift{0%{transform:translateX(-5%) translateY(0);}50%{transform:translateX(6%) translateY(-3%);}100%{transform:translateX(-5%) translateY(0);}}
+.logo-wrap{position:relative;z-index:2;padding:20px;}
+.logo-badge{width:180px;height:180px;margin:0 auto 10px;position:relative;}
+.logo-badge svg{width:100%;height:100%;filter:drop-shadow(0 0 22px rgba(184,144,63,.4));}
+.vault-outer{animation:vaultspin 60s linear infinite; transform-origin:75px 75px;}
+@keyframes vaultspin{to{transform:rotate(360deg);}}
+.vault-inner{animation:vaultspinrev 40s linear infinite; transform-origin:75px 75px;}
+@keyframes vaultspinrev{to{transform:rotate(-360deg);}}
+.glass-lens{transform-origin:62% 62%;animation:swing 4.5s ease-in-out infinite;}
+@keyframes swing{0%,100%{transform:rotate(-6deg);}50%{transform:rotate(6deg);}}
+.spark{animation:twinkle 2.6s ease-in-out infinite;}
+@keyframes twinkle{0%,100%{opacity:.12;}50%{opacity:1;}}
+.title-main{font-size:clamp(2.3rem,8vw,4rem);color:var(--paper);margin:6px 0 0;font-weight:900;
+  text-shadow:0 0 26px rgba(184,144,63,.4), 0 2px 0 #000;letter-spacing:3px;animation:titleflicker 3.4s ease-in-out .3s both;}
+@keyframes titleflicker{0%{opacity:0;letter-spacing:10px;} 55%{opacity:1;} 60%{opacity:.4;} 65%{opacity:1;} 100%{opacity:1;letter-spacing:3px;}}
+.title-sub{color:var(--brass-bright);font-family:'Courier Prime',monospace;margin:8px 0 26px;font-size:clamp(.7rem,2.4vw,.92rem);letter-spacing:3px;text-transform:uppercase;opacity:.9;}
+.title-sub::before,.title-sub::after{content:'—';margin:0 10px;color:var(--brass);}
+.menu-list{display:flex;flex-direction:column;gap:12px;width:min(360px,86vw);margin:0 auto;}
+.btn{border:1px solid var(--line); background:linear-gradient(180deg, rgba(233,223,198,.05), rgba(233,223,198,.02));
+  color:var(--paper); padding:14px 18px; border-radius:3px; font-size:1.02rem; letter-spacing:.5px; transition:.18s; position:relative; overflow:hidden;}
+.btn:hover{background:rgba(184,144,63,.14); border-color:var(--brass-bright); transform:translateY(-1px);}
+.btn:active{transform:translateY(0px) scale(.98);}
+.btn.primary{background:linear-gradient(180deg,var(--brass),#96742f); color:#1b1610; border-color:var(--brass-bright); font-weight:700;}
+.btn.primary:hover{background:linear-gradient(180deg,var(--brass-bright),var(--brass));}
+.btn.danger{border-color:rgba(150,60,40,.6); color:#e6ad9c;}
+.btn.danger:hover{background:rgba(150,60,40,.18); border-color:var(--rust);}
+.btn.small{padding:8px 12px;font-size:.85rem;}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;}
+.credit{margin-top:26px;color:var(--paper-dim);font-family:'Courier Prime',monospace;font-size:.68rem;opacity:.55;letter-spacing:1px;}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px; border-bottom:1px solid var(--line); background:rgba(0,0,0,.32); backdrop-filter:blur(2px); position:sticky; top:0; z-index:50;}
+.topbar .id{display:flex; align-items:center; gap:10px;}
+.badge-mini{width:32px;height:32px;flex:none;}
+.rank-chip{font-family:'Courier Prime',monospace; font-size:.66rem; color:var(--brass-bright); letter-spacing:1px; text-transform:uppercase;}
+.case-name{font-size:.82rem;color:var(--paper-dim); max-width:56vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.tabbar{display:flex; gap:4px; padding:8px 12px; overflow-x:auto; border-bottom:1px solid var(--line); background:rgba(0,0,0,.2);}
+.tab{flex:none; padding:9px 14px; border-radius:3px 3px 0 0; border:1px solid transparent; color:var(--paper-dim);
+  font-family:'Courier Prime',monospace; font-size:.76rem; letter-spacing:.5px; text-transform:uppercase; white-space:nowrap;}
+.tab.active{color:var(--brass-bright); border-color:var(--line); border-bottom-color:transparent; background:rgba(184,144,63,.08);}
+.tab .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--rust);margin-left:6px;vertical-align:middle;}
+.tab .dot.done{background:var(--ok);}
+.panel{flex:1; padding:16px; overflow-y:auto;}
+.card{background:linear-gradient(180deg, rgba(233,223,198,.045), rgba(233,223,198,.02)); border:1px solid var(--line); border-radius:4px; padding:16px; margin-bottom:14px; position:relative;}
+.card h3{margin:0 0 8px; color:var(--brass-bright); font-size:1rem;}
+.card p{margin:.3em 0; line-height:1.5; color:var(--paper-dim);}
+
+/* hero banners = "background images" for case / location */
+.hero-banner{position:relative; border-radius:8px; overflow:hidden; padding:30px 18px; margin-bottom:14px; border:1px solid var(--line); text-align:center;}
+.hero-banner::after{content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 20%, rgba(255,255,255,.06), transparent 65%);}
+.hero-icon{font-size:3rem; opacity:.92; filter:drop-shadow(0 4px 10px rgba(0,0,0,.55)); position:relative; z-index:1;}
+.hero-banner h2, .hero-banner h3{position:relative; z-index:1; margin:8px 0 2px;}
+.hero-sub{position:relative; z-index:1; font-size:.78rem; color:var(--brass-bright); font-family:'Courier Prime',monospace; letter-spacing:1px; text-transform:uppercase;}
+
+.loc-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px;}
+.loc-tile{border:1px solid var(--line); border-radius:5px; padding:14px 10px; text-align:center; position:relative; overflow:hidden; transition:.18s;}
+.loc-tile:hover{border-color:var(--brass-bright); transform:translateY(-2px);}
+.loc-tile .ic{font-size:1.8rem; display:block; margin-bottom:6px; filter:grayscale(.1);}
+.loc-tile .nm{font-size:.78rem; letter-spacing:.3px; position:relative; z-index:1;}
+.loc-tile .status{position:absolute; top:6px; right:8px; font-size:.6rem; font-family:'Courier Prime',monospace; color:var(--ok);}
+.loc-tile.visited{border-color:rgba(92,154,92,.5);}
+.loc-tile .badgecount{position:absolute;top:6px;left:8px;font-size:.58rem;color:var(--brass-bright);font-family:'Courier Prime',monospace;}
+.loc-tile .tileshade{position:absolute; inset:0; background:rgba(0,0,0,.35);}
+
+.evi-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px; margin-bottom:8px; border:1px dashed var(--line); border-radius:4px; background:rgba(0,0,0,.18);}
+.evi-row.found{border-style:solid; border-color:rgba(92,154,92,.5); background:rgba(92,154,92,.06);}
+.evi-title{font-size:.92rem;}
+.evi-sub{font-size:.7rem; color:var(--paper-dim); font-family:'Courier Prime',monospace; display:flex; align-items:center; gap:6px;}
+.type-chip{font-size:.6rem; padding:1px 6px; border-radius:8px; border:1px solid; text-transform:uppercase; letter-spacing:.5px;}
+.type-chip.caesar{color:var(--brass-bright); border-color:var(--brass);}
+.type-chip.hex{color:#9fd8d0; border-color:var(--teal);}
+.type-chip.morse{color:#c9b8ea; border-color:var(--violet);}
+.tag-found{color:var(--ok); font-size:.66rem; font-family:'Courier Prime',monospace;}
+
+.sus-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px;}
+.sus-card{border:1px solid var(--line); border-radius:5px; padding:14px; background:rgba(0,0,0,.22); transition:.18s; cursor:pointer; text-align:center;}
+.sus-card:hover{border-color:var(--brass-bright); background:rgba(184,144,63,.08); transform:translateY(-2px);}
+.avatar-box{width:72px;height:72px;margin:0 auto 8px;}
+.avatar-box svg{width:100%;height:100%;}
+.avatar-box.big{width:100px;height:100px;}
+.avatar-box.tiny{width:34px;height:34px;}
+.sus-name{font-size:.9rem; margin-bottom:2px;}
+.sus-role{font-size:.7rem; color:var(--brass-bright); font-family:'Courier Prime',monospace; margin-bottom:6px;}
+.sus-trait{font-size:.72rem; color:var(--paper-dim); font-style:italic;}
+
+.anim-stiff .eyelid{animation:blinkslow 6s ease-in-out infinite;}
+@keyframes blinkslow{0%,92%,100%{transform:scaleY(1);}94%{transform:scaleY(.1);}96%{transform:scaleY(1);}}
+.anim-tilt .headgrp{animation:tilt 5s ease-in-out infinite; transform-origin:50px 55px;}
+@keyframes tilt{0%,100%{transform:rotate(-3deg);}50%{transform:rotate(3deg);}}
+.anim-smirk .mouth{animation:smirk 3.4s ease-in-out infinite;}
+@keyframes smirk{0%,100%{transform:translateY(0) scaleX(1);}50%{transform:translateY(-1px) scaleX(1.15);}}
+.anim-glance .pupil{animation:glance 4.2s ease-in-out infinite;}
+@keyframes glance{0%,100%{transform:translateX(0);}25%{transform:translateX(2.5px);}50%{transform:translateX(-2.5px);}75%{transform:translateX(0);}}
+.anim-shake .headgrp{animation:shakeno 5.2s ease-in-out infinite;}
+@keyframes shakeno{0%,100%{transform:rotate(0deg);}10%{transform:rotate(-4deg);}20%{transform:rotate(4deg);}30%{transform:rotate(0deg);}}
+.anim-nod .headgrp{animation:nod 4.6s ease-in-out infinite; transform-origin:50px 60px;}
+@keyframes nod{0%,100%{transform:translateY(0);}50%{transform:translateY(2px);}}
+.anim-fidget .bodygrp{animation:fidget 2.6s ease-in-out infinite;}
+@keyframes fidget{0%,100%{transform:translateX(0) rotate(0);}25%{transform:translateX(-1px) rotate(-1deg);}75%{transform:translateX(1px) rotate(1deg);}}
+.reacting svg{animation:reactpulse .7s ease;}
+@keyframes reactpulse{0%{transform:scale(1);}30%{transform:scale(1.06) rotate(-2deg);}60%{transform:scale(.97) rotate(2deg);}100%{transform:scale(1);}}
+
+.dlg-head{display:flex; align-items:center; gap:14px; margin-bottom:14px;}
+.q-list{display:flex; flex-direction:column; gap:8px; margin-bottom:14px;}
+.q-btn{text-align:left; padding:10px 12px; border:1px solid var(--line); border-radius:4px; background:rgba(0,0,0,.15); color:var(--paper); font-size:.86rem;}
+.q-btn:hover{border-color:var(--brass-bright); background:rgba(184,144,63,.1);}
+.q-btn.asked{opacity:.5;}
+.answer-box{border-left:3px solid var(--brass); padding:10px 14px; background:rgba(184,144,63,.06); margin-top:6px; font-style:italic; color:var(--paper); display:none;}
+
+.modal-bg{position:fixed; inset:0; background:rgba(3,2,2,.86); z-index:200; display:none; align-items:center; justify-content:center; padding:14px;}
+.modal-bg.active{display:flex; animation:fadeIn .25s ease;}
+.modal{width:min(600px,100%); max-height:94vh; overflow-y:auto; background:#171310; border:1px solid var(--brass); border-radius:10px; padding:20px; box-shadow:0 24px 70px rgba(0,0,0,.65); position:relative;}
+.vault-type-banner{display:flex; align-items:center; gap:8px; font-family:'Courier Prime',monospace; font-size:.72rem; letter-spacing:1.5px; text-transform:uppercase; padding:6px 10px; border-radius:14px; border:1px solid; width:max-content; margin-bottom:10px;}
+.vault-type-banner.caesar{color:var(--brass-bright); border-color:var(--brass); background:rgba(184,144,63,.08);}
+.vault-type-banner.hex{color:#9fd8d0; border-color:var(--teal); background:rgba(60,90,82,.15);}
+.vault-type-banner.morse{color:#c9b8ea; border-color:var(--violet); background:rgba(107,92,143,.14);}
+.modal h3{margin-top:0; color:var(--brass-bright);}
+.cipher-strip{font-family:'Courier Prime',monospace; letter-spacing:1.5px; font-size:.92rem; padding:12px; background:#0c0a08; border:1px solid var(--line); border-radius:4px; word-break:break-word; color:var(--rust); margin-bottom:6px; min-height:26px;}
+.plain-strip{font-family:'Courier Prime',monospace; letter-spacing:1px; font-size:.95rem; padding:12px; background:#0c0a08; border:1px solid var(--line); border-radius:4px; word-break:break-word; color:var(--ok); margin-bottom:12px; min-height:44px;}
+.vault-wrap{display:flex; flex-direction:column; align-items:center; gap:8px; margin:16px 0; position:relative;}
+.vault-door{position:relative; width:250px; height:250px; max-width:78vw; max-height:78vw;}
+.vault-rim{position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle at 35% 30%, #3a3226, #0e0c09 75%); box-shadow:inset 0 0 0 4px rgba(0,0,0,.5), inset 0 0 30px rgba(0,0,0,.6), 0 8px 24px rgba(0,0,0,.5); border:3px solid var(--brass);}
+.vault-bolt{position:absolute; width:8px; height:8px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #d8b878, #6b501f); box-shadow:0 1px 2px rgba(0,0,0,.6);}
+.vault-dial{position:absolute; inset:20px; border-radius:50%; cursor:grab; touch-action:none; background:radial-gradient(circle at 38% 32%, #4a3e2a, #171209 78%); border:3px solid var(--brass-bright); box-shadow:inset 0 0 14px rgba(0,0,0,.7), 0 2px 10px rgba(0,0,0,.5); transition:transform .04s linear; user-select:none;}
+.vault-dial:active{cursor:grabbing;}
+.vault-dial .notch{position:absolute; left:50%; top:6px; width:2px; height:10px; background:var(--paper-dim); transform-origin:1px 119px; opacity:.55;}
+.vault-dial .notch.n0{background:var(--brass-bright); opacity:1; height:14px;}
+.vault-center{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; pointer-events:none;}
+.vault-center .lock-ic{font-size:1.6rem; opacity:.85;}
+.vault-pointer{position:absolute; top:-10px; left:50%; width:0; height:0; transform:translateX(-50%); border-left:8px solid transparent; border-right:8px solid transparent; border-bottom:14px solid var(--rust); filter:drop-shadow(0 0 4px rgba(150,60,40,.6));}
+.vault-handle{position:absolute; bottom:-4px; left:50%; transform:translateX(-50%); width:60px; height:14px; border-radius:8px; background:linear-gradient(180deg,#d8b878,#8a6a2c); box-shadow:0 2px 6px rgba(0,0,0,.5);}
+.value-readout{font-family:'Special Elite',monospace; color:var(--brass-bright); font-size:1rem; letter-spacing:2px; background:#0c0a08; border:1px solid var(--line); padding:4px 14px; border-radius:14px;}
+.vault-hint{font-size:.72rem; color:var(--paper-dim); text-align:center; max-width:340px;}
+.result-msg{margin-top:10px; padding:10px 12px; border-radius:4px; font-size:.88rem; display:none;}
+.result-msg.bad{display:block; background:rgba(150,60,40,.15); border:1px solid rgba(150,60,40,.5); color:#e6ad9c;}
+.result-msg.good{display:block; background:rgba(92,154,92,.15); border:1px solid rgba(92,154,92,.5); color:#bfe3bf; animation:pop .4s ease;}
+@keyframes pop{0%{transform:scale(.9); opacity:0;}60%{transform:scale(1.02);}100%{transform:scale(1); opacity:1;}}
+.confetti{position:absolute; inset:0; pointer-events:none; overflow:hidden;}
+.confetti i{position:absolute; top:-10px; width:6px; height:10px; background:var(--brass-bright); opacity:.85; animation:fall 1.4s ease-in forwards;}
+@keyframes fall{to{transform:translateY(360px) rotate(300deg); opacity:0;}}
+.vault-unlocked{animation:unlockflash .6s ease;}
+@keyframes unlockflash{0%{box-shadow:0 0 0 0 rgba(92,154,92,0);} 40%{box-shadow:0 0 40px 8px rgba(92,154,92,.5);} 100%{box-shadow:0 0 0 0 rgba(92,154,92,0);}}
+
+.journal-entry{border-left:2px solid var(--brass); padding:8px 12px; margin-bottom:8px; background:rgba(0,0,0,.15); display:flex; gap:10px; align-items:flex-start;}
+.journal-entry .je-avatar{flex:none; margin:0 !important; width:30px; height:30px;}
+.journal-entry .je-meta{font-family:'Courier Prime',monospace; font-size:.64rem; color:var(--brass-bright); margin-bottom:3px; text-transform:uppercase; letter-spacing:.5px;}
+.journal-entry .je-text{font-size:.85rem; color:var(--paper);}
+.journal-entry.system{border-left-color:var(--ok);}
+textarea.notes{width:100%; min-height:120px; background:rgba(0,0,0,.2); border:1px solid var(--line); color:var(--paper); border-radius:4px; padding:10px; font-family:'Crimson Pro',serif; font-size:.92rem; resize:vertical;}
+
+.accuse-list{display:flex; flex-direction:column; gap:8px; margin:14px 0;}
+.accuse-row{display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--line); border-radius:4px; cursor:pointer;}
+.accuse-row .avatar-box{margin:0; flex:none; width:36px; height:36px;}
+.accuse-row .accuse-info{display:flex; flex-direction:column; gap:1px;}
+.accuse-row:hover{border-color:var(--brass-bright);}
+.accuse-row.checked{background:rgba(184,144,63,.12); border-color:var(--brass-bright);}
+.accuse-row input{transform:scale(1.2); accent-color:var(--brass);}
+
+.verdict-card{text-align:center; padding:30px 18px;}
+.verdict-card h2{font-size:1.7rem; margin-bottom:6px;}
+.verdict-card.win h2{color:var(--ok);} .verdict-card.lose h2{color:var(--rust);}
+.stamp{display:inline-block; border:3px solid; border-radius:8px; padding:6px 18px; font-family:'Special Elite',monospace; letter-spacing:3px; font-size:1.05rem; transform:rotate(-4deg); margin:14px 0; animation:stampIn .35s ease;}
+.stamp.win{border-color:var(--ok); color:var(--ok);} .stamp.lose{border-color:var(--rust); color:var(--rust);}
+@keyframes stampIn{from{transform:rotate(-4deg) scale(2.4); opacity:0;} to{transform:rotate(-4deg) scale(1); opacity:1;}}
+
+.rank-progress{background:rgba(0,0,0,.2); border:1px solid var(--line); border-radius:5px; padding:16px; margin-bottom:16px;}
+.progress-track{height:8px; background:rgba(255,255,255,.08); border-radius:6px; overflow:hidden; margin-top:8px;}
+.progress-fill{height:100%; background:linear-gradient(90deg,var(--brass),var(--brass-bright)); transition:width .6s ease;}
+.stat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px;}
+.stat-box{text-align:center; border:1px solid var(--line); border-radius:4px; padding:12px 6px; background:rgba(0,0,0,.18);}
+.stat-num{font-family:'Special Elite',monospace; font-size:1.5rem; color:var(--brass-bright);}
+.stat-lbl{font-size:.63rem; text-transform:uppercase; letter-spacing:1px; color:var(--paper-dim); margin-top:2px;}
+
+.toast{position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:#171310; border:1px solid var(--brass); color:var(--paper); padding:10px 18px; border-radius:5px; font-size:.85rem; z-index:300; opacity:0; pointer-events:none; transition:.3s; max-width:88vw; text-align:center;}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(-6px);}
+.back-row{margin-bottom:14px;}
+.small-dim{font-size:.72rem; color:var(--paper-dim); font-family:'Courier Prime',monospace;}
+@media (max-width:520px){
+  .stat-grid{grid-template-columns:repeat(3,1fr);}
+  .sus-grid{grid-template-columns:1fr 1fr;}
+  .tabbar{gap:2px;} .tab{padding:8px 10px; font-size:.66rem;}
+  .case-name{max-width:40vw;}
+}
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div id="app">
+
+  <section class="screen active" id="screen-title">
+    <div class="vignette"></div>
+    <div class="fog"><span></span><span></span><span></span></div>
+    <div class="logo-wrap">
+      <div class="logo-badge">
+        <svg viewBox="0 0 150 150">
+          <g class="vault-outer">
+            <circle cx="75" cy="75" r="72" fill="none" stroke="#b8903f" stroke-width="2" opacity=".55"/>
+            <g stroke="#b8903f" stroke-width="1.4" opacity=".5">
+              <line x1="75" y1="4" x2="75" y2="14"/><line x1="75" y1="136" x2="75" y2="146"/>
+              <line x1="4" y1="75" x2="14" y2="75"/><line x1="136" y1="75" x2="146" y2="75"/>
+              <line x1="22" y1="22" x2="29" y2="29"/><line x1="121" y1="121" x2="128" y2="128"/>
+              <line x1="121" y1="22" x2="128" y2="29"/><line x1="22" y1="121" x2="29" y2="128"/>
+            </g>
+          </g>
+          <g class="vault-inner"><circle cx="75" cy="75" r="60" fill="none" stroke="#eec475" stroke-width="1" opacity=".35" stroke-dasharray="2 6"/></g>
+          <g class="spark"><circle cx="30" cy="26" r="1.6" fill="#eec475"/></g>
+          <g class="spark" style="animation-delay:.8s"><circle cx="118" cy="40" r="1.4" fill="#eec475"/></g>
+          <g class="spark" style="animation-delay:1.6s"><circle cx="112" cy="112" r="1.6" fill="#eec475"/></g>
+          <g class="glass-lens">
+            <circle cx="62" cy="62" r="24" fill="none" stroke="#eec475" stroke-width="5"/>
+            <line x1="78" y1="78" x2="106" y2="106" stroke="#eec475" stroke-width="7" stroke-linecap="round"/>
+            <circle cx="62" cy="62" r="24" fill="rgba(184,144,63,.08)"/>
+          </g>
+          <text x="75" y="140" text-anchor="middle" font-family="Courier Prime, monospace" font-size="7.5" fill="#b8903f" letter-spacing="2">TURN · DECODE · UNMASK</text>
+        </svg>
+      </div>
+      <h1 class="title-main">CIPHER NOIR</h1>
+      <div class="title-sub">Case Files of a Private Detective</div>
+      <div class="menu-list">
+        <button class="btn primary" data-action="new-case" data-reset="1">Begin New Investigation</button>
+        <button class="btn" id="btn-continue" data-action="continue-case" style="display:none;">Continue Investigation</button>
+        <button class="btn" data-action="goto-record">Detective Record</button>
+        <button class="btn" data-action="goto-howto">How To Play</button>
+        <button class="btn danger" data-action="reset-progress">Reset Progress</button>
+      </div>
+      <div class="credit">15 case files · 15 suspects each · 3 decoding disciplines · turn the vault to find the truth</div>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-howto">
+    <div class="wrap">
+      <div class="back-row"><button class="btn small" data-action="goto-title">&larr; Back</button></div>
+      <h2>How To Play</h2>
+      <div class="card">
+        <h3>1. Read the Brief</h3>
+        <p>Every new investigation pulls a random case from the archive — a new victim, a new setting, a new body found somewhere on the grounds. Read the brief to learn where it happened.</p>
+        <h3>2. Search the Locations</h3>
+        <p>Search every location for evidence. Some hold a single clue, others hide up to five.</p>
+        <h3>3. Crack the Vault</h3>
+        <p>Every clue is sealed behind one of three locks: a <b>Caesar</b> letter-shift, a <b>Hexadecimal</b> byte cipher, or a corrupted <b>Morse</b> signal. Drag the vault dial (or use the slider) until the plaintext panel resolves, then press <b>Lock In Decryption</b>.</p>
+        <h3>4. Interrogate the Suspects</h3>
+        <p>Up to fifteen people were present, each with a distinct face, temperament, and tell. Ask each their questions — watch how they react.</p>
+        <h3>5. Keep a Journal</h3>
+        <p>Every search, every decoded clue, and every conversation is logged automatically, with the suspect's own portrait beside it. Add your own notes too.</p>
+        <h3>6. File Your Accusation</h3>
+        <p>When you're certain, open the <b>Case Board</b> and accuse one or two suspects. One filing per case.</p>
+        <h3>7. Rise in Rank</h3>
+        <p>Solved cases raise your detective rank. Wrong accusations count against your record but never stop you investigating again.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-record">
+    <div class="wrap">
+      <div class="back-row"><button class="btn small" data-action="goto-title">&larr; Back</button></div>
+      <h2>Detective Record</h2>
+      <div class="rank-progress">
+        <div class="rank-chip" id="rec-rank">ROOKIE DETECTIVE</div>
+        <div class="small-dim" id="rec-next">Solve 2 cases to reach the next rank.</div>
+        <div class="progress-track"><div class="progress-fill" id="rec-progress-fill" style="width:0%"></div></div>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="stat-num" id="rec-solved">0</div><div class="stat-lbl">Solved</div></div>
+          <div class="stat-box"><div class="stat-num" id="rec-unsolved">0</div><div class="stat-lbl">Unsolved</div></div>
+          <div class="stat-box"><div class="stat-num" id="rec-total">0</div><div class="stat-lbl">Filed</div></div>
+        </div>
+      </div>
+      <h3>Case History</h3>
+      <div id="case-history"></div>
+    </div>
+  </section>
+
+  <section class="screen" id="screen-game">
+    <div class="topbar">
+      <div class="id">
+        <svg class="badge-mini" viewBox="0 0 150 150"><circle cx="75" cy="75" r="70" fill="none" stroke="#b8903f" stroke-width="4"/><circle cx="62" cy="62" r="24" fill="none" stroke="#eec475" stroke-width="6"/><line x1="80" y1="80" x2="104" y2="104" stroke="#eec475" stroke-width="8" stroke-linecap="round"/></svg>
+        <div>
+          <div class="rank-chip" id="game-rank">ROOKIE DETECTIVE</div>
+          <div class="case-name" id="game-case-name">Case File #1</div>
+        </div>
+      </div>
+      <button class="btn small" data-action="goto-title">Menu</button>
+    </div>
+    <div class="tabbar">
+      <button class="tab active" data-tab="brief">Brief</button>
+      <button class="tab" data-tab="map">Map</button>
+      <button class="tab" data-tab="suspects">Suspects</button>
+      <button class="tab" data-tab="journal">Journal</button>
+      <button class="tab" data-tab="board">Case Board</button>
+    </div>
+    <div class="panel wrap" id="tab-panel"></div>
+  </section>
+</div>
+
+<div class="modal-bg" id="modal-bg"><div class="modal" id="modal-body"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================ CIPHER HELPERS ============================================================ */
+function shiftChar(c, n){ const isUpper=c>='A'&&c<='Z', isLower=c>='a'&&c<='z'; if(!isUpper&&!isLower) return c;
+  const base=isUpper?65:97; return String.fromCharCode(((c.charCodeAt(0)-base+n)%26+26)%26+base); }
+function caesarEnc(text,n){ return text.split('').map(c=>shiftChar(c,n)).join(''); }
+function caesarDec(text,n){ return caesarEnc(text,-n); }
+function hexEncode(text, key){
+  return text.split('').map(ch=>{ const code=ch.charCodeAt(0); let s;
+    if(code>=32&&code<=126) s=((code-32+key)%95)+32; else s=code;
+    return s.toString(16).padStart(2,'0'); }).join(' ');
+}
+function hexDecodePreview(hexStr, key){
+  return hexStr.split(' ').filter(Boolean).map(pair=>{ const code=parseInt(pair,16); if(isNaN(code)) return '?';
+    if(code>=32&&code<=126) return String.fromCharCode(((code-32-key+950)%95)+32);
+    return String.fromCharCode(code); }).join('');
+}
+const MORSE = {A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',
+K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',
+W:'.--',X:'-..-',Y:'-.--',Z:'--..',0:'-----',1:'.----',2:'..---',3:'...--',4:'....-',5:'.....',
+6:'-....',7:'--...',8:'---..',9:'----.','.':'.-.-.-',',':'--..--',"'":'.----.','?':'..--..',
+'!':'-.-.--','/':'-..-.','-':'-....-','(':'-.--.',')':'-.--.-','"':'.-..-.',':':'---...',';':'-.-.-.','&':'.-...'};
+const MORSE_REV = Object.fromEntries(Object.entries(MORSE).map(([k,v])=>[v,k]));
+function morseEncodeText(text){ return text.toUpperCase().split('').map(ch=> ch===' '?'/':(MORSE[ch]||'')).filter(x=>x!=='').join(' '); }
+function morseDecodeLoose(morseStr){ return morseStr.split(' ').map(tok=> tok==='/'?' ':(tok===''?'':(MORSE_REV[tok]||'·'))).join(''); }
+function corruptMorse(morseStr, distance){
+  if(distance<=0) return morseStr;
+  const chance = Math.min(.85, distance*0.045+0.12);
+  return morseStr.split('').map(ch=>{ if((ch==='.'||ch==='-') && Math.random()<chance) return Math.random()<0.5?'▓':'▒'; return ch; }).join('');
+}
+function hashStr(s){ let h=0; for(let i=0;i<s.length;i++){ h=(h*31 + s.charCodeAt(i))>>>0; } return h; }
+function pick(arr, seed){ return arr[seed % arr.length]; }
+function shuffle(arr, rng){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor((rng?rng():Math.random())*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ============================================================ CONTENT BANKS ============================================================ */
+const FIRST_NAMES = ['Edmund','Seraphina','Victor','Rosalind','Tobias','Alistair','Nigel','Margaret','Cornelius','Ilsa',
+'Bartholomew','Vivienne','Augustin','Henri','Ambrose','Eleanor','Percival','Odette','Julian','Marguerite',
+'Desmond','Constance','Reginald','Beatrice','Ambrosia','Frederick','Lucinda','Silas','Genevieve','Clarence',
+'Winifred','Thaddeus','Rosamund','Leopold','Cassandra','Montgomery','Adelaide','Barnaby','Theodora','Emrys'];
+const LAST_NAMES = ['Hale','Blackwood','Cross','Finch','Wren','Vane','Marsh','Croft','Kessler','Thorne',
+'Castellan','Pryce','Laurent','Doyle','Fenwick','Delacroix','Kane','Ashford','Whitfield','Sinclair',
+'Harrow','Vex','Sterling','Graves','Mortlake','Blythe','Faircross','Hollis','Ravensworth','Nash',
+'Everard','Quill','Stanmore','Drummond','Wexford','Ellery','Corvin','Wolcott','Trent','Lockhart'];
+const VICTIM_TITLES = ['Lord','Lady','Dr.','Captain','Madame','Sir','Baron','Countess','Professor','Mr.','Mrs.'];
+
+const PERSONALITIES = [
+ {id:'nervous', label:'Nervous', desc:'Jumpy and easily flustered, quick to over-explain.', anim:'anim-fidget',
+  normalTell:['twisting a handkerchief between their fingers.','glancing at the door more than once.'],
+  stressTell:['knuckles white around the handkerchief now.','glancing at the door as if planning an exit.']},
+ {id:'smug', label:'Smug', desc:'Charming, self-assured, faintly amused by the whole affair.', anim:'anim-smirk',
+  normalTell:['a faint, knowing smile playing at their lips.','examining their nails as they speak.'],
+  stressTell:['the smile falters for just a moment before returning.','a beat too long before the smile comes back.']},
+ {id:'cold', label:'Cold', desc:'Unreadable, composed, gives nothing away.', anim:'anim-stiff',
+  normalTell:['their expression utterly unreadable.','arms crossed, gaze steady.'],
+  stressTell:['a muscle in their jaw tightens, just once.','the stillness feels a shade too deliberate.']},
+ {id:'warm', label:'Warm', desc:'Kind and eager to help, perhaps too eager.', anim:'anim-nod',
+  normalTell:['offering a small, sympathetic smile.','leaning forward as if eager to help.'],
+  stressTell:['the smile stays, but doesn\u2019t reach their eyes.','leaning forward, perhaps too eager to be believed.']},
+ {id:'blunt', label:'Blunt', desc:'Impatient, plain-spoken, doesn\u2019t suffer fools.', anim:'anim-shake',
+  normalTell:['arms folded, clearly impatient.','answering before you finish the question.'],
+  stressTell:['a short, humorless laugh escapes before they catch it.','the impatience feels like armor.']},
+ {id:'anxious', label:'Anxious', desc:'Restless and easily rattled under pressure.', anim:'anim-fidget',
+  normalTell:['fingers tapping restlessly against their knee.','eyes darting to every corner of the room.'],
+  stressTell:['a nervous little cough interrupts the sentence.','the tapping speeds up without them noticing.']},
+ {id:'calculating', label:'Calculating', desc:'Measured, deliberate, always thinking three steps ahead.', anim:'anim-tilt',
+  normalTell:['measuring every word before it leaves their mouth.','a long pause, as if weighing options.'],
+  stressTell:['the pause stretches a little too long this time.','eyes narrow slightly, calculating something new.']},
+ {id:'timid', label:'Timid', desc:'Soft-spoken and easily intimidated.', anim:'anim-glance',
+  normalTell:['shrinking back into their chair.','voice trembling slightly.'],
+  stressTell:['voice dropping to nearly a whisper.','avoiding your eyes entirely now.']},
+ {id:'arrogant', label:'Arrogant', desc:'Proud, dismissive, unused to being questioned.', anim:'anim-smirk',
+  normalTell:['chin lifted, looking faintly insulted by the question.','a dismissive wave of the hand.'],
+  stressTell:['the dismissiveness feels forced this time.','chin lifted higher than the question warrants.']},
+ {id:'grief', label:'Grief-stricken', desc:'Still reeling, voice catching at the edges.', anim:'anim-nod',
+  normalTell:['eyes glistening, voice catching.','a long, heavy silence before answering.'],
+  stressTell:['the grief seems to catch them off guard, like a mask slipping.','a long silence that feels different from sorrow.']},
+ {id:'sarcastic', label:'Sarcastic', desc:'Dry wit as a shield against discomfort.', anim:'anim-smirk',
+  normalTell:['a dry, cutting edge to their voice.','rolling their eyes before answering.'],
+  stressTell:['the sarcasm feels thinner than usual.','a smirk that doesn\u2019t quite hide the tension.']},
+ {id:'helpful', label:'Overly Helpful', desc:'Eager to assist, perhaps a little too eager.', anim:'anim-nod',
+  normalTell:['offering far more detail than asked for.','already anticipating your next question.'],
+  stressTell:['the details come faster now, almost rehearsed.','eager to move the conversation along quickly.']},
+ {id:'evasive', label:'Evasive', desc:'Slippery, hard to pin down, answers beside the question.', anim:'anim-glance',
+  normalTell:['answering the question beside the one you asked.','eyes sliding away from yours.'],
+  stressTell:['the evasion feels sharper, more practiced.','a careful pause before a very careful answer.']},
+ {id:'stoic', label:'Stoic', desc:'Unshakeable posture, measured and unhurried.', anim:'anim-stiff',
+  normalTell:['expression carved from stone.','a measured, unhurried tone.'],
+  stressTell:['the stone cracks, just barely, around the eyes.','the measured tone comes half a second late.']},
+ {id:'twitchy', label:'Twitchy', desc:'Sudden, jerky movements betray inner tension.', anim:'anim-fidget',
+  normalTell:['a sudden jerk of the shoulder.','fingers drumming an uneven rhythm.'],
+  stressTell:['the jerk of the shoulder happens twice now.','the rhythm falters entirely for a moment.']},
+ {id:'theatrical', label:'Theatrical', desc:'Everything is a performance, even grief.', anim:'anim-tilt',
+  normalTell:['a dramatic sigh before answering.','gesturing broadly as they speak.'],
+  stressTell:['the performance wavers for just a moment.','the broad gesture stops halfway through.']}
+];
+
+const ROLE_POOLS = {
+ household:['Butler','Housekeeper','Personal Secretary','Family Doctor','Business Partner','Estranged Cousin','Widow','Widower','Head Chef','Chauffeur','Head Gardener','Bodyguard','Financial Advisor','Childhood Friend','Rival Heir','Lady\u2019s Maid','Valet','Family Lawyer','Governess','Antiques Appraiser'],
+ vessel:['First Mate','Ship\u2019s Doctor','Purser','Chief Engineer','Steward','Stewardess','Wireless Operator','Captain\u2019s Aide','Cargo Master','Head Chef','Deckhand','Passenger Socialite','Business Rival','Private Secretary','Bodyguard','Family Lawyer','Old Friend','Stowaway'],
+ venue:['Stage Manager','Lead Actress','Lead Actor','Theatre Critic','Box Office Clerk','Costume Designer','Stagehand','Orchestra Conductor','Understudy','Talent Agent','Wealthy Patron','Security Guard','Curator','Restorer','Journalist','Financial Backer','Rival Performer','Personal Assistant','Makeup Artist','Doorman']
+};
+
+const MOTIVES = [
+ 'being cut from {v}\u2019s will','a secret {v} threatened to expose','an old wrong {v} never made right','a love {v} stood in the way of',
+ 'a business deal {v} was about to expose as fraud','a gambling debt only {v}\u2019s money could cover','a professional scandal {v} threatened to reveal',
+ 'a threat {v} made against someone they loved','a grudge going back years, one {v} never let them forget','a hidden affair {v} had discovered',
+ 'forged documents {v} was about to report','a theft {v} was days from uncovering','a bitter dispute over something {v} controlled','a scandal that would ruin them if {v} spoke'
+];
+
+const EVIDENCE_TYPES = [
+ {title:'Hidden Letter', guilty:'A hidden letter proves {s} knew about {m}, giving them every reason to want {v} gone.', innocent:'A hidden letter turns out to be unrelated correspondence, mentioning {m} only in passing. No real motive here.'},
+ {title:'Torn Ledger Page', guilty:'A torn ledger page shows {s} was deeply entangled in {m}, and desperate about it.', innocent:'A torn ledger page shows the matter of {m} was already settled weeks before the murder.'},
+ {title:'Bloodstained Item', guilty:'A bloodstained item traces back to {s}, whose explanation for the stain doesn\u2019t match the wound.', innocent:'A bloodstained item traces back to {s}, whose explanation checks out completely against the household record.'},
+ {title:'Forged Document', guilty:'A forged document bears {s}\u2019s hand, tied directly to {m}.', innocent:'A forged document turns out to predate {m} entirely, drafted for an unrelated reason.'},
+ {title:'Pawn Ticket', guilty:'A pawn ticket in {s}\u2019s name shows desperate money troubles tied to {m}.', innocent:'A pawn ticket in {s}\u2019s name is for a family heirloom, unrelated to {m}.'},
+ {title:'Secret Diary Entry', guilty:'A diary entry has {s} confessing fear and fury over {m}, days before the murder.', innocent:'A diary entry mentions {m} only as old, resolved history, nothing recent.'},
+ {title:'Threatening Note', guilty:'A threatening note, in a hand matching {s}\u2019s, references {m} directly.', innocent:'A threatening note is unsigned and, on close comparison, does not match {s}\u2019s handwriting at all.'},
+ {title:'Old Photograph', guilty:'An old photograph ties {s} to {m} far more closely than they admitted.', innocent:'An old photograph shows {s} at a pleasant, unrelated gathering, nothing to do with {m}.'},
+ {title:'Locked Box Contents', guilty:'A locked box belonging to {s} contains proof of {m}, carefully hidden away.', innocent:'A locked box belonging to {s} contains only sentimental keepsakes, nothing related to {m}.'},
+ {title:'Overheard Conversation', guilty:'A written account of an overheard conversation has {s} arguing bitterly about {m} the very night of the murder.', innocent:'A written account of an overheard conversation shows {s} calmly resolving the matter of {m}, no threats made.'},
+ {title:'Financial Statement', guilty:'A financial statement shows {s} stood to gain enormously the moment {v} was gone, tied straight to {m}.', innocent:'A financial statement shows {s} had nothing meaningful to gain from {v}\u2019s death.'},
+ {title:'Personal Item', guilty:'A personal item belonging to {s} was found somewhere it had no business being, tied to {m}.', innocent:'A personal item belonging to {s} was simply misplaced during the evening\u2019s chaos.'},
+ {title:'Scrap of Fabric', guilty:'A scrap of fabric matches clothing {s} was wearing, snagged in a place that damns them given {m}.', innocent:'A scrap of fabric matches clothing {s} was wearing, but the location has an innocent explanation.'},
+ {title:'Residue in a Vial', guilty:'Residue in a small vial traced to {s} matches a substance used that night, and connects clearly to {m}.', innocent:'Residue in a small vial traced to {s} turns out to be a harmless tonic, unrelated to {m}.'}
+];
+
+const GENERIC_CLUES = [
+ {title:'Stopped Clock', text:'A clock in {loc} stopped at the moment of the struggle, fixing the time of death precisely.'},
+ {title:'Forced Window', text:'A window in {loc} was forced open from outside, the latch bent and scratched.'},
+ {title:'Muddy Footprints', text:'A trail of muddy footprints leads through {loc} and vanishes near an exit.'},
+ {title:'Fingerprint Smear', text:'A glass in {loc} bears two distinct sets of fingerprints, suggesting a late, unplanned meeting.'},
+ {title:'Torn Rope', text:'A length of torn rope in {loc} matches marks found near where {v} was killed.'},
+ {title:'Missing Weapon Outline', text:'A dust outline in {loc} shows something sharp and heavy was recently removed.'},
+ {title:'Scorched Papers', text:'Half-burned papers in {loc} suggest someone tried, and failed, to destroy evidence quickly.'},
+ {title:'Disturbed Furniture', text:'Furniture in {loc} has been shifted just enough to suggest a struggle, or a search.'},
+ {title:'Wilted Flowers', text:'A vase of flowers in {loc} wilted unnaturally fast, as though something toxic touched the water.'},
+ {title:'Scattered Playing Cards', text:'A hand of playing cards lies scattered across {loc}, abandoned mid-game.'},
+ {title:'Hidden Spare Key', text:'A spare key hidden in {loc} opens a door that should have stayed locked that night.'},
+ {title:'Cryptic Note', text:'A cryptic, unsigned note tucked in {loc} reads like a warning {v} never heeded.'},
+ {title:'Victim\u2019s Fears', text:'A private note in {loc} lists {v}\u2019s private fears about nearly everyone in the house, a map of motives if read closely.'},
+ {title:'Faint Perfume/Cologne', text:'A faint, unfamiliar scent lingers in {loc}, out of place among the household\u2019s usual habits.'}
+];
+
+const ALIBI_ACTIONS = ['sorting paperwork','having a quiet drink','reading by lamplight','checking the accounts','resting after a long day',
+'tending to a small task','writing letters','looking over old photographs','polishing a keepsake','staring out at the weather',
+'mending a torn coat','listening to the wind outside','going over the evening\u2019s schedule','waiting for the storm to pass'];
+
+const UNIVERSAL_SLOTS = [
+ {id:'office', icon:'\ud83d\udd6f\ufe0f', names:{household:'The Study', vessel:'The Chart Room', venue:'The Manager\u2019s Office'}, desc:'Papers and correspondence sit stacked, though someone has clearly been through them recently.'},
+ {id:'library', icon:'\ud83d\udcda', names:{household:'The Library', vessel:'The Reading Salon', venue:'The Archive Room'}, desc:'Rows of bound volumes and the smell of old paper. A chair still holds the warmth of someone recently seated.'},
+ {id:'kitchen', icon:'\ud83c\udf7d\ufe0f', names:{household:'The Kitchen', vessel:'The Galley', venue:'The Catering Room'}, desc:'Pots and provisions in careful order, though a few things seem to have been moved.'},
+ {id:'guestroom', icon:'\ud83d\udd70\ufe0f', names:{household:'The Guest Bedroom', vessel:'Sleeper Cabin 7', venue:'The Green Room'}, desc:'A private space someone clearly wanted kept that way. A few personal effects sit in plain view.'},
+ {id:'grounds', icon:'\ud83c\udf39', names:{household:'The Garden', vessel:'The Promenade Deck', venue:'The Courtyard'}, desc:'Open air and long shadows. Something here doesn\u2019t quite belong.'},
+ {id:'cellar', icon:'\ud83c\udf77', names:{household:'The Wine Cellar', vessel:'The Cargo Hold', venue:'The Storage Room'}, desc:'Cool, dim, and quiet, the kind of place people go when they don\u2019t want to be found.'},
+ {id:'chapel', icon:'\u26ea', names:{household:'The Chapel', vessel:'The Quiet Car', venue:'The Meditation Room'}, desc:'A small, hushed space. Candles have burned recently, though no service was scheduled.'},
+ {id:'attic', icon:'\ud83d\udddd\ufe0f', names:{household:'The Attic', vessel:'The Upper Storage', venue:'The Prop Loft'}, desc:'Dust, forgotten belongings, and the sense that something was recently disturbed up here.'},
+ {id:'staff', icon:'\ud83e\uddfa', names:{household:'Servants\u2019 Quarters', vessel:'Crew Quarters', venue:'The Staff Room'}, desc:'Simple, tidy, and shared, the kind of place where secrets get traded along with gossip.'},
+ {id:'dining', icon:'\ud83c\udf7d\ufe0f', names:{household:'The Dining Hall', vessel:'The Dining Car', venue:'The Banquet Room'}, desc:'A table still set for a meal no one finished. Chairs pushed back in haste.'}
+];
+
+const GRADS = [
+ 'linear-gradient(160deg,#2b2418,#14110c)','linear-gradient(160deg,#1c2b28,#0c1412)','linear-gradient(160deg,#241c2b,#120c14)',
+ 'linear-gradient(160deg,#2b1c1c,#140c0c)','linear-gradient(160deg,#1c2430,#0c1016)','linear-gradient(160deg,#2b2818,#14120c)',
+ 'linear-gradient(160deg,#20281c,#10140c)','linear-gradient(160deg,#281c24,#140c12)','linear-gradient(160deg,#28241c,#14120c)',
+ 'linear-gradient(160deg,#1c2828,#0c1414)'
+];
+
+const CASES = [
+ {title:'The Blackwood Estate Murder', vt:'Lord', category:'household', motif:'\ud83c\udff0', grad:'linear-gradient(160deg,#2b2418,#0e0c08)',
+  intro:'{v} was found dead in {b}, struck down during a storm that cut the estate off until morning. Before the end came, fragments of the truth were left behind: torn papers, hidden letters, careless mistakes, scattered across the manor grounds.',
+  uniq:[{id:'u1', name:'The Study', icon:'\ud83d\udd6f\ufe0f', desc:'Where the body was found. Papers scattered, the window unlatched, a glass of brandy gone cold.'},
+        {id:'u2', name:'The Stables', icon:'\ud83d\udc0e', desc:'Horses stir uneasily. A lantern swings from a hook.'},
+        {id:'u3', name:'The Boathouse', icon:'\ud83d\udea4', desc:'Water laps at the dock. Rope coils hang from rusted hooks.'}]},
+ {title:'Death on the Midnight Express', vt:'Baron', category:'vessel', motif:'\ud83d\ude82', grad:'linear-gradient(160deg,#1c2028,#0a0c10)',
+  intro:'{v} was found dead in {b} as the train thundered through the night with nowhere to stop. The killer had nowhere to run either, which means the clues, and the culprit, are still on board.',
+  uniq:[{id:'u1', name:'The Dining Car', icon:'\ud83c\udf7d\ufe0f', desc:'Where the body was found. Silverware still laid for a meal no one finished.'},
+        {id:'u2', name:'Sleeper Cabin 4B', icon:'\ud83d\udecc', desc:'A private cabin, curtains drawn, luggage half-unpacked.'},
+        {id:'u3', name:'The Engine Room', icon:'\u2699\ufe0f', desc:'Heat and noise and the smell of oil. Easy to disappear in here.'}]},
+ {title:'Curtain Call at the Egret Theatre', vt:'Mr.', category:'venue', motif:'\ud83c\udfad', grad:'linear-gradient(160deg,#2b1820,#100a0e)',
+  intro:'{v} was found dead in {b}, moments before the curtain was due to rise. The show never went on. Everyone backstage swears they saw nothing, and every one of them is lying about something.',
+  uniq:[{id:'u1', name:'The Stage', icon:'\ud83c\udfad', desc:'Where the body was found. The set still dressed for a play that never opened.'},
+        {id:'u2', name:'The Costume Room', icon:'\ud83e\udde5', desc:'Racks of costumes, half in shadow, one drawer left open.'},
+        {id:'u3', name:'The Orchestra Pit', icon:'\ud83c\udfbb', desc:'Music stands and abandoned instruments, silent now.'}]},
+ {title:'The Sinking of the SS Meridian', vt:'Captain', category:'vessel', motif:'\u2693', grad:'linear-gradient(160deg,#101c28,#080e14)',
+  intro:'{v} was found dead in {b} as the ship pressed on through open water, three days from the nearest port. Whoever did this is still aboard, and so is the proof.',
+  uniq:[{id:'u1', name:'The Captain\u2019s Cabin', icon:'\u2693', desc:'Where the body was found. Charts pinned to the wall, a broken lamp on the floor.'},
+        {id:'u2', name:'The Engine Room', icon:'\u2699\ufe0f', desc:'The rhythmic thunder of the engines never quite stops.'},
+        {id:'u3', name:'The Cargo Hold', icon:'\ud83d\udce6', desc:'Crates stacked high, some marked, some deliberately not.'}]},
+ {title:'Silence at Thornfield Museum', vt:'Dr.', category:'venue', motif:'\ud83c\udff0', grad:'linear-gradient(160deg,#28241c,#100e0a)',
+  intro:'{v} was found dead in {b} after hours, long after the last visitor had gone home. Nothing appears to be stolen, which makes the motive all the more troubling.',
+  uniq:[{id:'u1', name:'The Egyptian Gallery', icon:'\ud83e\uddf1', desc:'Where the body was found. Ancient artifacts watch on in silence.'},
+        {id:'u2', name:'The Restoration Workshop', icon:'\ud83d\udd8c\ufe0f', desc:'Tools, solvents, and half-repaired treasures.'},
+        {id:'u3', name:'The Archive Vault', icon:'\ud83d\udd10', desc:'Climate-controlled and locked, or it should have been.'}]},
+ {title:'The Vanishing at Hollow Pines Lodge', vt:'Mr.', category:'household', motif:'\ud83c\udf32', grad:'linear-gradient(160deg,#1c2818,#0c140a)',
+  intro:'{v} was found dead in {b}, the first snow of the season already sealing the roads shut. The guests invited for a quiet weekend now have nowhere to go, and nothing left to hide behind.',
+  uniq:[{id:'u1', name:'The Trophy Room', icon:'\ud83e\udd8c', desc:'Where the body was found. Mounted heads stare down from every wall.'},
+        {id:'u2', name:'The Hunting Blind', icon:'\ud83c\udff9', desc:'A cold, hidden perch overlooking the tree line.'},
+        {id:'u3', name:'The Ice House', icon:'\ud83e\uddca', desc:'A dark, freezing room built to keep things from spoiling.'}]},
+ {title:'Last Reel at Silverlight Studios', vt:'Mr.', category:'venue', motif:'\ud83c\udfa5', grad:'linear-gradient(160deg,#1c1c1c,#0a0a0a)',
+  intro:'{v} was found dead in {b}, the projector still running, casting flickering light over the scene. The picture was never finished. Neither, it seems, was someone\u2019s grudge.',
+  uniq:[{id:'u1', name:'The Screening Room', icon:'\ud83c\udfa5', desc:'Where the body was found. Rows of empty seats face a still-lit screen.'},
+        {id:'u2', name:'The Sound Stage', icon:'\ud83c\udfa4', desc:'A cavernous set half-built, half-abandoned.'},
+        {id:'u3', name:'The Film Vault', icon:'\ud83c\udf9e\ufe0f', desc:'Reels of film stacked floor to ceiling, flammable and forgotten.'}]},
+ {title:'The Lighthouse Keeper\u2019s Secret', vt:'Mr.', category:'household', motif:'\ud83d\uddfc', grad:'linear-gradient(160deg,#101c28,#08121c)',
+  intro:'{v} was found dead in {b}, the great lamp dark for the first time in forty years during the worst storm of the decade. Whoever did this wanted the light to go out.',
+  uniq:[{id:'u1', name:'The Lamp Room', icon:'\ud83d\uddfc', desc:'Where the body was found. The great lens sits cold and dark.'},
+        {id:'u2', name:'The Keeper\u2019s Quarters', icon:'\ud83d\udecf\ufe0f', desc:'A small, spartan room battered by the wind outside.'},
+        {id:'u3', name:'The Rocky Shoreline', icon:'\ud83c\udf0a', desc:'Waves crash against black stone. Something washed up here recently.'}]},
+ {title:'Masquerade at Castellan Manor', vt:'Countess', category:'household', motif:'\ud83c\udfad', grad:'linear-gradient(160deg,#241c2b,#100c14)',
+  intro:'{v} was found dead in {b}, still in costume, unmasked only in death. Every guest wore a disguise that night, and more than one of them is still wearing one now.',
+  uniq:[{id:'u1', name:'The Ballroom', icon:'\ud83d\udc83', desc:'Where the body was found. Masks litter the floor beneath a silent chandelier.'},
+        {id:'u2', name:'The Mask Gallery', icon:'\ud83c\udfad', desc:'A hall of masks from centuries past, watching from the walls.'},
+        {id:'u3', name:'The Hedge Maze', icon:'\ud83c\udf3f', desc:'Tall hedges, moonlight, and too many places to hide.'}]},
+ {title:'The Auction House Affair', vt:'Mr.', category:'venue', motif:'\ud83d\udd28', grad:'linear-gradient(160deg,#2b1c1c,#140c0c)',
+  intro:'{v} was found dead in {b}, moments after the night\u2019s most valuable lot was sold under mysterious circumstances. Money, pride, and old grudges were all on the table.',
+  uniq:[{id:'u1', name:'The Vault Room', icon:'\ud83d\udd10', desc:'Where the body was found. An open safe, its contents unclear.'},
+        {id:'u2', name:'The Bidding Hall', icon:'\ud83d\udd28', desc:'Rows of empty chairs facing a raised podium.'},
+        {id:'u3', name:'The Appraisal Office', icon:'\ud83d\udd0d', desc:'Loupe, ledgers, and a locked drawer of certificates.'}]},
+ {title:'Frost on the Alpine Express', vt:'Ms.', category:'vessel', motif:'\u2744\ufe0f', grad:'linear-gradient(160deg,#182430,#0a1016)',
+  intro:'{v} was found dead in {b} after the train was halted by an avalanche, stranding every passenger aboard until the tracks could be cleared. No one arrived. No one left. The killer is still here.',
+  uniq:[{id:'u1', name:'The Observation Car', icon:'\ud83c\udfd4\ufe0f', desc:'Where the body was found. Glass walls look out onto a wall of snow.'},
+        {id:'u2', name:'Sleeper Cabin 2A', icon:'\ud83d\udecc', desc:'A private cabin, unnervingly tidy for the circumstances.'},
+        {id:'u3', name:'The Baggage Car', icon:'\ud83e\uddf3', desc:'Trunks and cases stacked in the cold, half-frozen dark.'}]},
+ {title:'The Carnival of Shadows', vt:'Mr.', category:'venue', motif:'\ud83c\udfaa', grad:'linear-gradient(160deg,#2b1c14,#140c08)',
+  intro:'{v} was found dead in {b} after the final show of the night, the crowds long gone and the lights dimmed. Performers, roustabouts, and hangers-on all had their reasons to want the ringmaster silenced.',
+  uniq:[{id:'u1', name:'The Big Top Tent', icon:'\ud83c\udfaa', desc:'Where the body was found. Ropes and rigging creak overhead in the dark.'},
+        {id:'u2', name:'The Fortune Teller\u2019s Wagon', icon:'\ud83d\udd2e', desc:'Beads, candles, and a deck of cards left mid-reading.'},
+        {id:'u3', name:'The Menagerie Cages', icon:'\ud83e\udd81', desc:'Restless animals pace behind bars in the cold night air.'}]},
+ {title:'Deadline at the Gazette', vt:'Ms.', category:'venue', motif:'\ud83d\udcf0', grad:'linear-gradient(160deg,#1c1c1c,#0c0c0c)',
+  intro:'{v} was found dead in {b} the night before the biggest story of the year was set to run. Someone didn\u2019t want it printed, and was willing to bury the editor along with it.',
+  uniq:[{id:'u1', name:'The Print Room', icon:'\ud83d\udda8\ufe0f', desc:'Where the body was found. The presses stand silent, ink still wet on the last page.'},
+        {id:'u2', name:'The Editor\u2019s Office', icon:'\ud83d\udcdd', desc:'A cluttered desk, drafts marked up in red ink.'},
+        {id:'u3', name:'The Archive Basement', icon:'\ud83d\udcc1', desc:'Decades of old stories filed away, some more dangerous than others.'}]},
+ {title:'The Vineyard Inheritance', vt:'Mr.', category:'household', motif:'\ud83c\udf47', grad:'linear-gradient(160deg,#2b1820,#140c10)',
+  intro:'{v} was found dead in {b} during the harvest\u2019s final night, the whole estate gathered for a celebration that ended in silence. Family, staff, and rivals all had a hand in the vineyard\u2019s fortunes, and perhaps in its master\u2019s death.',
+  uniq:[{id:'u1', name:'The Wine Press House', icon:'\ud83c\udf47', desc:'Where the body was found. The press stands still, stained deep red.'},
+        {id:'u2', name:'The Barrel Cellar', icon:'\ud83c\udf77', desc:'Rows of oak barrels aging in the cool dark.'},
+        {id:'u3', name:'The Vine Rows', icon:'\ud83c\udf43', desc:'Endless rows stretching into the dark, heavy with the last harvest.'}]},
+ {title:'Storm Over Ravenscar Asylum', vt:'Dr.', category:'household', motif:'\u26a1', grad:'linear-gradient(160deg,#1c2418,#0c1008)',
+  intro:'{v} was found dead in {b}, surrounded by notes on research the institute always kept quiet. Staff and patients alike had reason to fear what that work might expose.',
+  uniq:[{id:'u1', name:'The Laboratory', icon:'\u2697\ufe0f', desc:'Where the body was found. Broken glass and scattered notes cover the floor.'},
+        {id:'u2', name:'The Patient Ward', icon:'\ud83d\udecf\ufe0f', desc:'Rows of quiet beds, and quieter secrets.'},
+        {id:'u3', name:'The Records Room', icon:'\ud83d\udcc4', desc:'Filing cabinets full of case notes no one was meant to read.'}]}
+];
+
+const RANKS = [
+ {min:0, name:'Rookie Detective'},{min:2, name:'Junior Investigator'},{min:4, name:'Detective'},
+ {min:7, name:'Senior Detective'},{min:10, name:'Master Detective'},{min:15, name:'Legendary Detective'}
+];
+
+/* ============================================================ AVATAR GENERATOR ============================================================ */
+const SKIN_TONES = ['#dcae8c','#e6c9a8','#c99968','#a8785a','#f0d5b8'];
+const HAIR_COLORS = ['#241f18','#4a3826','#6b5a3e','#8a8378','#2e2620','#5c4530'];
+const COLOR_PALETTE = ['#8a7355','#7a5a6b','#5c6b7a','#6b7a5c','#5c7a63','#7a6b5c','#7a5c5c','#6b5c8f','#5c7a7a','#8a5c6b'];
+function hairStyle(idx, color){
+  const styles = [
+    `<path d="M31 34 Q50 26 69 34 L69 30 Q50 22 31 30 Z" fill="${color}"/>`,
+    `<path d="M28 38 Q50 14 72 38 Q72 30 50 26 Q28 30 28 38Z" fill="${color}"/><circle cx="50" cy="20" r="6" fill="${color}"/>`,
+    `<path d="M25 40 Q50 10 75 40 Q75 58 68 60 Q70 44 50 30 Q30 44 32 60 Q25 58 25 40Z" fill="${color}"/>`,
+    `<path d="M30 36 Q50 20 70 36 L70 28 Q50 18 30 28Z" fill="${color}"/>`,
+    `<path d="M26 38 Q30 20 42 24 Q46 16 54 24 Q66 18 72 34 Q76 40 70 44 Q72 30 60 28 Q64 36 56 32 Q58 24 50 28 Q44 22 42 30 Q36 24 32 32 Q28 36 30 42 Q24 42 26 38Z" fill="${color}"/>`
+  ];
+  return styles[idx % styles.length];
+}
+function accessoryFor(role){
+  const r = role.toLowerCase();
+  if(r.includes('doctor')) return `<circle cx="43" cy="45" r="6" fill="none" stroke="#c9a86a" stroke-width="1.6"/><circle cx="57" cy="45" r="6" fill="none" stroke="#c9a86a" stroke-width="1.6"/><line x1="49" y1="45" x2="51" y2="45" stroke="#c9a86a" stroke-width="1.6"/>`;
+  if(r.includes('butler')||r.includes('steward')||r.includes('valet')||r.includes('aide')) return `<path d="M44 66 L50 70 L56 66 L56 72 L50 76 L44 72 Z" fill="#1a1a1a"/>`;
+  if(r.includes('housekeeper')||r.includes('maid')||r.includes('governess')) return `<path d="M27 40 Q50 14 73 40 Q73 30 50 26 Q27 30 27 40Z" fill="#6b7a52"/>`;
+  if(r.includes('chef')||r.includes('cook')) return `<rect x="38" y="12" width="24" height="14" rx="6" fill="#e6ded0"/><rect x="36" y="22" width="28" height="8" fill="#e6ded0"/>`;
+  if(r.includes('garden')) return `<ellipse cx="50" cy="30" rx="26" ry="8" fill="#8a6a3a"/>`;
+  if(r.includes('captain')||r.includes('officer')||r.includes('engineer')||r.includes('conductor')||r.includes('mate')||r.includes('purser')) return `<path d="M30 34 Q50 20 70 34 L70 28 Q50 16 30 28Z" fill="#26313a"/><rect x="30" y="32" width="40" height="4" fill="#1a1a1a"/>`;
+  if(r.includes('lawyer')||r.includes('secretary')||r.includes('accountant')||r.includes('critic')||r.includes('journalist')||r.includes('advisor')||r.includes('appraiser')||r.includes('curator')) return `<circle cx="43" cy="45" r="5.5" fill="none" stroke="#8a8378" stroke-width="1.4"/><circle cx="57" cy="45" r="5.5" fill="none" stroke="#8a8378" stroke-width="1.4"/><line x1="48.5" y1="45" x2="51.5" y2="45" stroke="#8a8378" stroke-width="1.4"/>`;
+  if(r.includes('actress')||r.includes('actor')||r.includes('performer')||r.includes('theatrical')) return `<path d="M40 24 Q50 12 60 24" stroke="#c9a86a" stroke-width="2" fill="none"/>`;
+  return '';
+}
+function mouthFor(personalityId){
+  const smirk = `<path d="M42 55 Q52 50 60 54" stroke="#5c3a26" stroke-width="2.2" fill="none" class="mouth"/>`;
+  const flat = `<path d="M41 56 Q50 56 59 56" stroke="#5c3a26" stroke-width="2" fill="none" class="mouth"/>`;
+  const smile = `<path d="M40 54 Q50 61 60 54" stroke="#5c3a26" stroke-width="2.2" fill="none" class="mouth"/>`;
+  const frown = `<path d="M40 58 Q50 52 60 58" stroke="#5c3a26" stroke-width="2.2" fill="none" class="mouth"/>`;
+  const small = `<path d="M45 56 Q50 58 55 56" stroke="#5c3a26" stroke-width="2" fill="none" class="mouth"/>`;
+  const map = {smug:smirk, arrogant:smirk, sarcastic:smirk, theatrical:smile, warm:smile, helpful:smile,
+    grief:frown, cold:flat, stoic:flat, blunt:flat, calculating:small, evasive:small, nervous:small, anxious:small, timid:small, twitchy:small};
+  return map[personalityId] || flat;
+}
+function buildAvatarSvg(suspect, opts){
+  const seed = hashStr(suspect.name+suspect.role);
+  const skin = pick(SKIN_TONES, seed);
+  const hairColor = pick(HAIR_COLORS, seed>>2);
+  const hairIdx = seed % 5;
+  const color = suspect.color;
+  const anim = (opts&&opts.noAnim) ? '' : suspect.personality.anim;
+  return `<svg viewBox="0 0 100 100" class="${anim}">
+    <circle cx="50" cy="58" r="30" fill="${color}22"/>
+    <g class="bodygrp"><rect x="27" y="68" width="46" height="32" rx="9" fill="${color}"/></g>
+    <g class="headgrp">
+      <circle cx="50" cy="44" r="18" fill="${skin}"/>
+      ${hairStyle(hairIdx, hairColor)}
+      ${accessoryFor(suspect.role)}
+      <circle cx="43" cy="45" r="1.8" fill="#221d18" class="pupil"/>
+      <circle cx="57" cy="45" r="1.8" fill="#221d18" class="pupil"/>
+      ${mouthFor(suspect.personality.id)}
+    </g>
+  </svg>`;
+}
+
+/* ============================================================ STATE ============================================================ */
+let stats = {solved:0, unsolved:0, history:[]};
+let game = null;
+const hasStorage = typeof window.storage !== 'undefined';
+async function saveStats(){ try{ if(hasStorage) await window.storage.set('cn_stats', JSON.stringify(stats), false); }catch(e){} }
+async function loadStats(){ try{ if(hasStorage){ const r = await window.storage.get('cn_stats', false); if(r) stats = JSON.parse(r.value); } }catch(e){} }
+async function saveGame(){ try{ if(hasStorage) await window.storage.set('cn_game', JSON.stringify(game), false); }catch(e){} }
+async function loadGame(){ try{ if(hasStorage){ const r = await window.storage.get('cn_game', false); if(r) game = JSON.parse(r.value); } }catch(e){} }
+async function clearAll(){
+  stats = {solved:0, unsolved:0, history:[]}; game = null;
+  try{ if(hasStorage){ await window.storage.delete('cn_stats', false); await window.storage.delete('cn_game', false);} }catch(e){}
+}
+function rankFor(solved){ let r = RANKS[0]; for(const x of RANKS){ if(solved >= x.min) r = x; } return r; }
+function nextRankInfo(solved){ const idx = RANKS.findIndex(r=>r.min> solved); return idx===-1?null:RANKS[idx]; }
+function toast(msg, long){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t=setTimeout(()=>t.classList.remove('show'), long?4200:2200);
+}
+
+/* ============================================================ CASE GENERATION ============================================================ */
+function newCase(resetNumber){
+  const prevNum = (!resetNumber && game && game.caseNumber) ? game.caseNumber+1 : 1;
+  const caseDef = CASES[Math.floor(Math.random()*CASES.length)];
+  const victimFirst = pick(shuffle(FIRST_NAMES), Math.floor(Math.random()*FIRST_NAMES.length));
+  const victimLast = pick(shuffle(LAST_NAMES), Math.floor(Math.random()*LAST_NAMES.length));
+  const victimFull = `${caseDef.vt} ${victimFirst} ${victimLast}`;
+
+  // locations: universal slots + case-unique
+  const locations = UNIVERSAL_SLOTS.map((slot,i)=>({
+    id: slot.id, name: slot.names[caseDef.category], icon: slot.icon, bg: GRADS[i%GRADS.length], desc: slot.desc
+  })).concat(caseDef.uniq.map((u,i)=>({ id:u.id, name:u.name, icon:u.icon, bg:caseDef.grad, desc:u.desc })));
+  const bodyLoc = locations[10]; // first uniq entry = body location
+
+  // suspects
+  const firstShuf = shuffle(FIRST_NAMES);
+  const lastShuf = shuffle(LAST_NAMES);
+  const roles = shuffle(ROLE_POOLS[caseDef.category]).slice(0,15);
+  const personalities = shuffle(PERSONALITIES).slice(0,15);
+  const motives = shuffle(MOTIVES);
+  const evidences = shuffle(EVIDENCE_TYPES);
+  const alibiActions = shuffle(ALIBI_ACTIONS);
+  const shuffledLocs = shuffle(locations);
+
+  const suspects = [];
+  for(let i=0;i<15;i++){
+    const name = `${firstShuf[i]} ${lastShuf[i]}`;
+    const role = roles[i];
+    const personality = personalities[i];
+    const motiveNoun = motives[i % motives.length].replace(/\{v\}/g, victimFull);
+    const evidence = evidences[i % evidences.length];
+    const sigLoc = shuffledLocs[i % shuffledLocs.length];
+    const alibiLoc = shuffledLocs[(i+3) % shuffledLocs.length];
+    const alibiAction = alibiActions[i % alibiActions.length];
+    const corrobIdx = (i+7) % 15;
+    const color = pick(COLOR_PALETTE, hashStr(name+role));
+
+    const suspect = {
+      id: 'sus'+i, name, role, personality, color,
+      trait: personality.desc,
+      bio: `Present on the grounds the night ${victimFull} died. Role: ${role}.`,
+      alibi: `Claims to have been in ${alibiLoc.name}, ${alibiAction}.`,
+      alibiLocId: alibiLoc.id, sigLocId: sigLoc.id,
+      evidenceTitle: evidence.title,
+      guiltyClue: evidence.guilty.replace(/\{s\}/g, name).replace(/\{v\}/g, victimFull).replace(/\{m\}/g, motiveNoun),
+      innocentClue: evidence.innocent.replace(/\{s\}/g, name).replace(/\{v\}/g, victimFull).replace(/\{m\}/g, motiveNoun),
+      corrobName: null, // filled below
+      questions: []
+    };
+    suspects.push(suspect);
+  }
+  suspects.forEach((s,i)=>{ s.corrobName = suspects[(i+7)%15].name; });
+
+  // culprits
+  const shuffledIds = shuffle(suspects.map(s=>s.id));
+  const numCulprits = Math.random()<0.35 ? 2 : 1;
+  const culprits = shuffledIds.slice(0, numCulprits);
+
+  // build questions (resolved text, both variants, personality-flavored)
+  suspects.forEach(s=>{
+    const alibiLocObj = locations.find(l=>l.id===s.alibiLocId);
+    const p = s.personality;
+    const tellN1 = p.normalTell[0], tellN2 = p.normalTell[1];
+    const tellS1 = p.stressTell[0], tellS2 = p.stressTell[1];
+    s.questions = [
+      { q:`Where were you when ${victimFull} was killed?`, innocent:'', guilty:'' },
+      { q:`What was your relationship with ${victimFull}?`, innocent:'', guilty:'' },
+      { q:`Did ${victimFull} have enemies, or any reason someone might want them gone?`, innocent:'', guilty:'' },
+      { q:'Is there anything you haven\u2019t told me about that night?', innocent:'', guilty:'' }
+    ];
+    const alibiAction = ALIBI_ACTIONS[hashStr(s.id+'a') % ALIBI_ACTIONS.length];
+    s.questions[0].innocent = `\u201cI was in ${alibiLocObj.name}, ${alibiAction}. ${s.corrobName} can confirm it.\u201d ${tellN1}`;
+    s.questions[0].guilty = `\u201cI was in ${alibiLocObj.name}, ${alibiAction}. Alone, I\u2019m afraid, no one to vouch for me.\u201d ${tellS1}`;
+    s.questions[1].innocent = `\u201cWe got along well enough. There was friction now and then, as there always is, but I had no reason to wish them harm.\u201d ${tellN2}`;
+    s.questions[1].guilty = `\u201cWe got along well enough.\u201d ${tellS2}`;
+    s.questions[2].innocent = `\u201c${victimFull.split(' ').slice(-1)[0]} certainly had rivals, but nothing I\u2019d call murderous. People resented them without wanting them dead.\u201d ${tellN1}`;
+    s.questions[2].guilty = `\u201cEnemies? I couldn\u2019t begin to say.\u201d ${tellS1}`;
+    s.questions[3].innocent = `\u201cNo, Detective. I\u2019ve told you everything I know.\u201d ${tellN2}`;
+    s.questions[3].guilty = `\u201cNo. Nothing else to tell.\u201d ${tellS2}`;
+  });
+
+  // clues: signature (one per suspect) + generic filler, grouped by location, capped 1-5 per location
+  const clueState = {};
+  const perLocClues = {};
+  locations.forEach(l=> perLocClues[l.id] = []);
+
+  suspects.forEach(s=>{
+    const isCulprit = culprits.includes(s.id);
+    const decoded = isCulprit ? s.guiltyClue : s.innocentClue;
+    perLocClues[s.sigLocId].push({ title: s.evidenceTitle, decoded, susId:s.id });
+  });
+  // fill/cap with generic clues so each location has 1-5
+  const genericShuffled = shuffle(GENERIC_CLUES);
+  let gi = 0;
+  locations.forEach(l=>{
+    let arr = perLocClues[l.id];
+    if(arr.length > 5) arr = arr.slice(0,5); // cap
+    while(arr.length < 1){
+      const g = genericShuffled[gi % genericShuffled.length]; gi++;
+      arr.push({ title:g.title, decoded:g.text.replace(/\{loc\}/g,l.name).replace(/\{v\}/g,victimFull), susId:null });
+    }
+    // randomly add a couple extra generic clues for depth (up to 5 total)
+    const extra = Math.floor(Math.random()*2);
+    for(let k=0;k<extra && arr.length<5;k++){
+      const g = genericShuffled[gi % genericShuffled.length]; gi++;
+      arr.push({ title:g.title, decoded:g.text.replace(/\{loc\}/g,l.name).replace(/\{v\}/g,victimFull), susId:null });
+    }
+    perLocClues[l.id] = arr;
+  });
+
+  let cipherCycle = 0;
+  const cipherOrder = ['caesar','hex','morse'];
+  locations.forEach(l=>{
+    perLocClues[l.id].forEach((c,idx)=>{
+      const key = l.id+'::'+idx;
+      const type = cipherOrder[cipherCycle % 3]; cipherCycle++;
+      const correctValue = 1+Math.floor(Math.random()*24);
+      let cipherDisplay;
+      if(type==='caesar') cipherDisplay = caesarEnc(c.decoded, correctValue);
+      else if(type==='hex') cipherDisplay = hexEncode(c.decoded, correctValue);
+      else cipherDisplay = morseEncodeText(c.decoded);
+      clueState[key] = { found:false, type, correctValue, decodedText:c.decoded, cipherDisplay, title:c.title, locName:l.name, locId:l.id, susId:c.susId };
+    });
+  });
+
+  game = {
+    caseTitle: caseDef.title, caseMotif: caseDef.motif, caseGrad: caseDef.grad,
+    victimFull, bodyLocName: bodyLoc.name, bodyLocId: bodyLoc.id,
+    intro: caseDef.intro.replace(/\{v\}/g, victimFull).replace(/\{b\}/g, bodyLoc.name),
+    locations, suspects, culprits,
+    visited:{}, clues: clueState, asked:{}, journal:[], notes:'', verdict:null,
+    started:Date.now(), _accuseSel:[], allSearchedNotified:false, caseNumber: prevNum
+  };
+  saveGame();
+}
+function addJournal(type,text,susId){ game.journal.push({type,text,t:Date.now(),susId:susId||null}); }
+
+/* ============================================================ NAVIGATION ============================================================ */
+function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function gotoTitle(){ document.getElementById('btn-continue').style.display = game ? 'block':'none'; showScreen('screen-title'); }
+async function gotoRecord(){
+  showScreen('screen-record');
+  const rank = rankFor(stats.solved); const nxt = nextRankInfo(stats.solved);
+  document.getElementById('rec-rank').textContent = rank.name;
+  document.getElementById('rec-next').textContent = nxt ? `Solve ${nxt.min-stats.solved} more case(s) to reach ${nxt.name}.` : 'You have reached the highest rank.';
+  const total = stats.solved+stats.unsolved;
+  const pct = nxt ? Math.min(100, Math.round((stats.solved/nxt.min)*100)) : 100;
+  document.getElementById('rec-progress-fill').style.width = pct+'%';
+  document.getElementById('rec-solved').textContent = stats.solved;
+  document.getElementById('rec-unsolved').textContent = stats.unsolved;
+  document.getElementById('rec-total').textContent = total;
+  const hist = document.getElementById('case-history');
+  hist.innerHTML = stats.history.length===0 ? '<p class="small-dim">No cases filed yet. Your record begins with your first accusation.</p>'
+    : stats.history.slice().reverse().map(h=>`
+      <div class="card" style="padding:12px 16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <b style="color:${h.win?'var(--ok)':'var(--rust)'}">${h.win?'SOLVED':'UNSOLVED'}</b>
+          <span class="small-dim">${new Date(h.t).toLocaleDateString()}</span>
+        </div>
+        <p style="margin-top:6px;"><b>${h.caseTitle||''}</b><br>${h.summary}</p>
+      </div>`).join('');
+}
+function gotoGame(){
+  showScreen('screen-game');
+  document.getElementById('game-rank').textContent = rankFor(stats.solved).name;
+  document.getElementById('game-case-name').textContent = `Case File #${game.caseNumber||1} \u2014 ${game.caseTitle}`;
+  setTab('brief');
+}
+
+/* ============================================================ TABS ============================================================ */
+let currentTab='brief';
+function setTab(tab){ currentTab=tab; document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tab)); renderTab(); }
+function renderTab(){
+  const panel = document.getElementById('tab-panel');
+  if(!game){ panel.innerHTML='<p>No active case.</p>'; return; }
+  if(currentTab==='brief') panel.innerHTML = renderBrief();
+  else if(currentTab==='map') panel.innerHTML = renderMap();
+  else if(currentTab==='suspects') panel.innerHTML = renderSuspects();
+  else if(currentTab==='journal') panel.innerHTML = renderJournal();
+  else if(currentTab==='board') panel.innerHTML = renderBoard();
+  updateTabDots();
+}
+function updateTabDots(){
+  const foundCount = Object.values(game.clues).filter(c=>c.found).length;
+  const total = Object.keys(game.clues).length;
+  const mapTab = document.querySelector('.tab[data-tab="map"] .dot');
+  if(mapTab) mapTab.classList.toggle('done', foundCount===total);
+}
+function renderBrief(){
+  return `
+    <div class="hero-banner" style="background:${game.caseGrad}">
+      <div class="hero-icon">${game.caseMotif}</div>
+      <h2>${game.caseTitle}</h2>
+      <div class="hero-sub">Case File #${game.caseNumber||1} \u2014 Victim: ${game.victimFull}</div>
+    </div>
+    <div class="card">
+      <h3>Case Brief</h3>
+      <p>${game.intro}</p>
+      <p>The body of ${game.victimFull} was discovered in <b>${game.bodyLocName}</b>. Search every location, decode what you find, and question all fifteen present that night.</p>
+    </div>
+    <div class="card">
+      <h3>Your Progress</h3>
+      <p class="mono">Locations visited: ${Object.keys(game.visited).length} / ${game.locations.length}</p>
+      <p class="mono">Clues decoded: ${Object.values(game.clues).filter(c=>c.found).length} / ${Object.keys(game.clues).length}</p>
+      <p class="mono">Suspects questioned: ${new Set(Object.keys(game.asked).map(k=>k.split('::')[0])).size} / ${game.suspects.length}</p>
+    </div>
+  `;
+}
+function renderMap(){
+  const tiles = game.locations.map(loc=>{
+    const visited = !!game.visited[loc.id];
+    const clueKeys = Object.keys(game.clues).filter(k=>k.startsWith(loc.id+'::'));
+    const foundHere = clueKeys.filter(k=>game.clues[k].found).length;
+    return `<div class="loc-tile ${visited?'visited':''}" style="background:${loc.bg}" data-action="open-loc" data-loc="${loc.id}">
+      <div class="tileshade"></div>
+      <span class="badgecount">${foundHere}/${clueKeys.length}</span>
+      ${visited?'<span class="status">\u2713</span>':''}
+      <span class="ic">${loc.icon}</span>
+      <span class="nm">${loc.name}</span>
+    </div>`;
+  }).join('');
+  return `<div class="loc-grid">${tiles}</div>`;
+}
+function renderLocation(locId){
+  const loc = game.locations.find(l=>l.id===locId);
+  if(!game.visited[locId]){
+    game.visited[locId]=true;
+    addJournal('search', `Searched ${loc.name}.`);
+    saveGame();
+    if(Object.keys(game.visited).length === game.locations.length && !game.allSearchedNotified){
+      game.allSearchedNotified = true; saveGame();
+      setTimeout(()=> toast('It seems I have searched all of the locations and gathered all of the necessary clues. I should probably check my journal.', true), 400);
+    }
+  }
+  const clueKeys = Object.keys(game.clues).filter(k=>k.startsWith(locId+'::'));
+  const rows = clueKeys.map(key=>{
+    const st = game.clues[key];
+    return `<div class="evi-row ${st.found?'found':''}">
+      <div>
+        <div class="evi-title">${st.title}</div>
+        <div class="evi-sub"><span class="type-chip ${st.type}">${st.type}</span> ${st.found? 'Decoded &amp; logged':'Locked'}</div>
+      </div>
+      ${st.found ? '<span class="tag-found">\u2713 FOUND</span>' : `<button class="btn small" data-action="open-decoder" data-key="${key}">Decode</button>`}
+    </div>`;
+  }).join('');
+  return `
+    <div class="back-row"><button class="btn small" data-action="tab-map">&larr; Back to Map</button></div>
+    <div class="hero-banner" style="background:${loc.bg}"><div class="hero-icon">${loc.icon}</div><h3>${loc.name}</h3></div>
+    <div class="card"><p>${loc.desc}</p></div>
+    <div class="card"><h3>Evidence (${clueKeys.length})</h3>${rows}</div>
+  `;
+}
+function renderSuspects(){
+  const cards = game.suspects.map(s=>`
+    <div class="sus-card" data-action="open-suspect" data-sus="${s.id}">
+      <div class="avatar-box">${buildAvatarSvg(s)}</div>
+      <div class="sus-name">${s.name}</div>
+      <div class="sus-role">${s.role}</div>
+      <div class="sus-trait">${s.personality.label}</div>
+    </div>`).join('');
+  return `<div class="sus-grid">${cards}</div>`;
+}
+function renderSuspectDialogue(susId){
+  const s = game.suspects.find(x=>x.id===susId);
+  const isCulprit = game.culprits.includes(s.id);
+  const qs = s.questions.map((q,i)=>{
+    const key = s.id+'::'+i;
+    const asked = !!game.asked[key];
+    const answer = isCulprit ? q.guilty : q.innocent;
+    return `
+      <button class="q-btn ${asked?'asked':''}" data-action="ask-q" data-sus="${s.id}" data-qi="${i}">${q.q}</button>
+      <div class="answer-box" id="ans-${s.id}-${i}" style="${asked?'display:block':''}">${asked?answer:''}</div>
+    `;
+  }).join('');
+  return `
+    <div class="back-row"><button class="btn small" data-action="tab-suspects">&larr; Back to Suspects</button></div>
+    <div class="dlg-head">
+      <div class="avatar-box big" id="dlg-avatar">${buildAvatarSvg(s)}</div>
+      <div><h3 style="margin:0;">${s.name}</h3><div class="sus-role">${s.role} \u00b7 ${s.personality.label}</div></div>
+    </div>
+    <div class="card"><p>${s.bio}</p><p><i>${s.personality.desc}</i></p><p class="mono" style="color:var(--brass-bright)">Alibi: ${s.alibi}</p></div>
+    <div class="card"><h3>Questions</h3><div class="q-list">${qs}</div></div>
+  `;
+}
+function renderJournal(){
+  const entries = game.journal.slice().reverse().map(j=>{
+    const sus = j.susId ? game.suspects.find(s=>s.id===j.susId) : null;
+    const avatar = sus ? `<div class="avatar-box tiny je-avatar">${buildAvatarSvg(sus,{noAnim:true})}</div>` : '';
+    const label = j.type==='search' ? 'Location searched' : j.type==='clue' ? 'Clue decoded' : j.type==='talk' ? 'Conversation' : 'Note';
+    return `<div class="journal-entry ${j.type==='note'?'system':''}">
+      ${avatar}
+      <div>
+        <div class="je-meta">${label} \u00b7 ${new Date(j.t).toLocaleTimeString()}</div>
+        <div class="je-text">${j.text}</div>
+      </div>
+    </div>`;
+  }).join('') || '<p class="small-dim">Nothing logged yet. Go search a location.</p>';
+  return `
+    <div class="card"><h3>Field Journal</h3>${entries}</div>
+    <div class="card"><h3>Personal Notes</h3>
+      <textarea class="notes" id="notes-area" placeholder="Jot your own theories here...">${game.notes||''}</textarea>
+    </div>
+  `;
+}
+function renderBoard(){
+  const foundAll = Object.values(game.clues).every(c=>c.found);
+  const rows = game.suspects.map(s=>`
+    <label class="accuse-row ${game._accuseSel && game._accuseSel.includes(s.id)?'checked':''}" data-action="toggle-accuse" data-sus="${s.id}">
+      <input type="checkbox" ${game._accuseSel && game._accuseSel.includes(s.id)?'checked':''} data-sus-cb="${s.id}">
+      <div class="avatar-box tiny">${buildAvatarSvg(s,{noAnim:true})}</div>
+      <div class="accuse-info"><div>${s.name}</div><div class="sus-role">${s.role}</div></div>
+    </label>`).join('');
+  return `
+    <div class="card">
+      <h3>File Your Accusation</h3>
+      <p>Select one or two suspects you believe are responsible. This filing is final for this case.</p>
+      ${!foundAll ? '<p style="color:var(--brass-bright)">Tip: you haven\u2019t decoded every clue yet. You may still accuse, but more evidence means a stronger case.</p>':''}
+      <div class="accuse-list">${rows}</div>
+      <button class="btn primary" data-action="submit-accusation">File Accusation</button>
+    </div>
+  `;
+}
+
+/* ============================================================ VAULT DECODER ============================================================ */
+let activeClueKey=null;
+let dialVal=0, dragging=false, dragStartAngle=0, dialStartVal=0;
+function openDecoder(key){
+  activeClueKey=key;
+  const st = game.clues[key];
+  dialVal = 0;
+  const modal = document.getElementById('modal-body');
+  const typeLabel = st.type==='caesar' ? 'Caesar Cipher Lock' : st.type==='hex' ? 'Hexadecimal Byte Lock' : 'Morse Signal Lock';
+  const typeIcon = st.type==='caesar' ? '\ud83d\udd11' : st.type==='hex' ? '\ud83d\udd1f' : '\ud83d\udce1';
+  const hint = st.type==='caesar' ? 'Rotate the dial to shift the letters back into place.'
+             : st.type==='hex' ? 'Rotate the dial to find the byte key that unlocks the text.'
+             : 'Rotate the dial to tune out the static and clear the signal.';
+  let notches = ''; for(let i=0;i<26;i++){ notches += `<div class="notch ${i===0?'n0':''}" style="transform:translateX(-50%) rotate(${i*(360/26)}deg)"></div>`; }
+  let bolts = ''; for(let i=0;i<8;i++){ const ang=i*45*Math.PI/180; const x=125+112*Math.cos(ang), y=125+112*Math.sin(ang); bolts += `<div class="vault-bolt" style="left:${x-4}px; top:${y-4}px;"></div>`; }
+  modal.innerHTML = `
+    <div class="vault-type-banner ${st.type}">${typeIcon} ${typeLabel}</div>
+    <h3>${st.title}</h3>
+    <p class="small-dim">Found in: ${st.locName}</p>
+    <div class="cipher-strip mono" id="cipher-strip">${st.cipherDisplay}</div>
+    <div class="plain-strip mono" id="plain-strip"></div>
+    <div class="vault-wrap">
+      <div class="vault-door" id="vault-door">
+        <div class="vault-rim">${bolts}</div>
+        <div class="vault-pointer"></div>
+        <div class="vault-dial" id="vault-dial">${notches}<div class="vault-handle"></div></div>
+        <div class="vault-center"><span class="lock-ic">${typeIcon}</span></div>
+      </div>
+      <div class="value-readout" id="value-readout">${st.type==='caesar'?'SHIFT':'KEY'}: 0</div>
+      <input type="range" min="0" max="25" value="0" id="shift-slider" style="width:min(280px,80vw);">
+      <p class="vault-hint">${hint}</p>
+    </div>
+    <div class="result-msg" id="result-msg"></div>
+    <div class="btn-row" style="margin-top:12px; justify-content:center;">
+      <button class="btn primary" data-action="confirm-decode">Lock In Decryption</button>
+      <button class="btn" data-action="close-modal">Cancel</button>
+    </div>
+  `;
+  document.getElementById('modal-bg').classList.add('active');
+  const slider = document.getElementById('shift-slider');
+  slider.addEventListener('input', ()=>{ setDialValue(parseInt(slider.value,10)); });
+  setupDialDrag();
+  setDialValue(0);
+}
+function setupDialDrag(){
+  const dial = document.getElementById('vault-dial'); const door = document.getElementById('vault-door');
+  function angleFromEvent(e){ const rect=door.getBoundingClientRect(); const cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
+    const px=(e.touches?e.touches[0].clientX:e.clientX), py=(e.touches?e.touches[0].clientY:e.clientY);
+    return Math.atan2(py-cy, px-cx)*180/Math.PI; }
+  function start(e){ dragging=true; dragStartAngle=angleFromEvent(e); dialStartVal=dialVal; e.preventDefault(); }
+  function move(e){ if(!dragging) return; const ang=angleFromEvent(e); const delta=ang-dragStartAngle;
+    const steps=Math.round(delta/(360/26)); let nv=(dialStartVal+steps)%26; if(nv<0) nv+=26; setDialValue(nv); e.preventDefault(); }
+  function end(){ dragging=false; }
+  dial.addEventListener('pointerdown', start); window.addEventListener('pointermove', move); window.addEventListener('pointerup', end);
+  dial.addEventListener('touchstart', start, {passive:false}); window.addEventListener('touchmove', move, {passive:false}); window.addEventListener('touchend', end);
+}
+function setDialValue(v){
+  dialVal = v;
+  const dial = document.getElementById('vault-dial'); if(dial) dial.style.transform = `rotate(${v*(360/26)}deg)`;
+  const slider = document.getElementById('shift-slider'); if(slider) slider.value = v;
+  const st = game.clues[activeClueKey];
+  document.getElementById('value-readout').textContent = (st.type==='caesar'?'SHIFT: ':'KEY: ')+v;
+  updatePreview();
+}
+function updatePreview(){
+  const st = game.clues[activeClueKey]; let preview = '';
+  if(st.type==='caesar'){ preview = caesarDec(st.cipherDisplay, dialVal); }
+  else if(st.type==='hex'){ preview = hexDecodePreview(st.cipherDisplay, dialVal); }
+  else {
+    const distance = Math.abs(dialVal - st.correctValue);
+    const corrupted = corruptMorse(st.cipherDisplay, distance);
+    document.getElementById('cipher-strip').textContent = corrupted;
+    preview = distance===0 ? st.decodedText : morseDecodeLoose(corrupted);
+  }
+  document.getElementById('plain-strip').textContent = preview;
+  document.getElementById('result-msg').className='result-msg'; document.getElementById('result-msg').textContent='';
+}
+function confirmDecode(){
+  const st = game.clues[activeClueKey]; const msg = document.getElementById('result-msg');
+  if(dialVal === st.correctValue){
+    st.found = true;
+    addJournal('clue', `${st.title} (${st.locName}): ${st.decodedText}`);
+    saveGame();
+    msg.className='result-msg good'; msg.textContent = '\u2713 Vault unlocked! '+st.decodedText;
+    document.getElementById('vault-door').classList.add('vault-unlocked');
+    spawnConfetti(); toast('Evidence logged to your journal');
+    setTimeout(()=>{ closeModal(); renderTab(); }, 1700);
+  } else {
+    msg.className='result-msg bad';
+    msg.textContent = st.type==='morse' ? 'The signal is still too distorted \u2014 keep tuning.' : 'The text is still garbled \u2014 keep turning the dial.';
+  }
+}
+function spawnConfetti(){
+  const modal = document.getElementById('modal-body'); const c=document.createElement('div'); c.className='confetti';
+  for(let i=0;i<20;i++){ const s=document.createElement('i'); s.style.left=(Math.random()*100)+'%';
+    s.style.background=['#eec475','#b8903f','#5c9a5c'][i%3]; s.style.animationDelay=(Math.random()*.3)+'s'; c.appendChild(s); }
+  modal.appendChild(c); setTimeout(()=>c.remove(),1600);
+}
+function closeModal(){ document.getElementById('modal-bg').classList.remove('active'); activeClueKey=null; }
+
+/* ============================================================ ACCUSATION ============================================================ */
+function toggleAccuse(susId){
+  game._accuseSel = game._accuseSel || [];
+  const idx = game._accuseSel.indexOf(susId);
+  if(idx>=0) game._accuseSel.splice(idx,1);
+  else { if(game._accuseSel.length>=2){ toast('You may accuse at most two suspects.'); return; } game._accuseSel.push(susId); }
+  renderTab();
+}
+async function submitAccusation(){
+  const sel = game._accuseSel || [];
+  if(sel.length===0){ toast('Select at least one suspect first.'); return; }
+  const culpritsSorted=[...game.culprits].sort(); const selSorted=[...sel].sort();
+  const win = culpritsSorted.length===selSorted.length && culpritsSorted.every((c,i)=>c===selSorted[i]);
+  const culpritNames = game.culprits.map(id=>game.suspects.find(s=>s.id===id).name).join(' and ');
+  const selNames = sel.map(id=>game.suspects.find(s=>s.id===id).name).join(' and ');
+  if(win) stats.solved++; else stats.unsolved++;
+  stats.history.push({win, t:Date.now(), caseTitle: game.caseTitle, summary: win
+      ? `You correctly accused ${culpritNames}. Case closed.`
+      : `You accused ${selNames}. The true culprit(s): ${culpritNames}.`});
+  await saveStats();
+  game.verdict = {win, culpritNames, selNames};
+  await saveGame();
+  renderVerdict();
+}
+function renderVerdict(){
+  const v = game.verdict;
+  const panel = document.getElementById('tab-panel');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('game-rank').textContent = rankFor(stats.solved).name;
+  panel.innerHTML = `
+    <div class="card verdict-card ${v.win?'win':'lose'}">
+      <h2>${v.win?'Case Solved':'Case Unsolved'}</h2>
+      <div class="stamp ${v.win?'win':'lose'}">${v.win?'CASE CLOSED':'WRONG SUSPECT'}</div>
+      <p>${v.win
+        ? `Your instincts were sound. <b>${v.culpritNames}</b> is taken into custody, and the truth about ${game.victimFull} finally comes to light.`
+        : `You accused <b>${v.selNames}</b>, but the evidence pointed elsewhere. The true culprit \u2014 <b>${v.culpritNames}</b> \u2014 remains at large.`}</p>
+      <p class="small-dim">Your rank: ${rankFor(stats.solved).name}</p>
+      <div class="btn-row" style="justify-content:center;margin-top:16px;">
+        <button class="btn primary" data-action="new-case">Start New Investigation</button>
+        <button class="btn" data-action="goto-record">View Detective Record</button>
+        <button class="btn" data-action="goto-title">Main Menu</button>
+      </div>
+    </div>
+  `;
+}
+
+/* ============================================================ EVENT DELEGATION ============================================================ */
+document.addEventListener('click', async (e)=>{
+  const el = e.target.closest('[data-action]');
+  if(!el) return;
+  const action = el.dataset.action;
+  if(action==='new-case'){ newCase(el.dataset.reset==='1'); gotoGame(); }
+  else if(action==='continue-case'){ if(game) gotoGame(); }
+  else if(action==='goto-title'){ gotoTitle(); }
+  else if(action==='goto-record'){ gotoRecord(); }
+  else if(action==='goto-howto'){ showScreen('screen-howto'); }
+  else if(action==='reset-progress'){
+    if(confirm('This will permanently erase your detective record and any case in progress. Continue?')){ await clearAll(); toast('Progress reset.'); gotoTitle(); }
+  }
+  else if(action==='tab-map'){ setTab('map'); }
+  else if(action==='tab-suspects'){ setTab('suspects'); }
+  else if(action==='open-loc'){ document.getElementById('tab-panel').innerHTML = renderLocation(el.dataset.loc); updateTabDots(); }
+  else if(action==='open-suspect'){ document.getElementById('tab-panel').innerHTML = renderSuspectDialogue(el.dataset.sus); }
+  else if(action==='ask-q'){
+    const key = el.dataset.sus+'::'+el.dataset.qi;
+    game.asked[key]=true;
+    const s = game.suspects.find(x=>x.id===el.dataset.sus);
+    const q = s.questions[el.dataset.qi];
+    addJournal('talk', `Asked ${s.name}: \u201c${q.q}\u201d`, s.id);
+    saveGame();
+    document.getElementById('tab-panel').innerHTML = renderSuspectDialogue(el.dataset.sus);
+    const av = document.getElementById('dlg-avatar');
+    if(av){ av.classList.add('reacting'); setTimeout(()=>av.classList.remove('reacting'), 750); }
+  }
+  else if(action==='open-decoder'){ openDecoder(el.dataset.key); }
+  else if(action==='close-modal'){ closeModal(); }
+  else if(action==='confirm-decode'){ confirmDecode(); }
+  else if(action==='toggle-accuse'){ toggleAccuse(el.dataset.sus); }
+  else if(action==='submit-accusation'){ submitAccusation(); }
+});
+document.addEventListener('change', (e)=>{ if(e.target.matches('[data-sus-cb]')) toggleAccuse(e.target.dataset.susCb); });
+document.querySelectorAll('.tab').forEach(t=> t.addEventListener('click', ()=> setTab(t.dataset.tab)) );
+document.addEventListener('input', (e)=>{ if(e.target.id==='notes-area'){ game.notes = e.target.value; saveGame(); } });
+document.getElementById('modal-bg').addEventListener('click', (e)=>{ if(e.target.id==='modal-bg') closeModal(); });
+
+/* ============================================================ INIT ============================================================ */
+(async function init(){
+  await loadStats(); await loadGame();
+  document.getElementById('btn-continue').style.display = game ? 'block':'none';
+  gotoTitle();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>HASHRUSH: Crypto Empire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0c;
+  --bg-alt:#141417;
+  --panel:#1a1a1f;
+  --panel-2:#212127;
+  --border:#2c2c33;
+  --yellow:#f5c518;
+  --yellow-bright:#ffe066;
+  --yellow-dark:#8a5c00;
+  --black:#000000;
+  --text:#f1f0ec;
+  --muted:#8f8f99;
+  --green:#22c55e;
+  --green-dim:#123b23;
+  --red:#ef4444;
+  --red-dim:#3b1414;
+  --radius:14px;
+  --shadow: 0 8px 30px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  margin:0;
+  background:
+    radial-gradient(1200px 600px at 20% -10%, #1c1a10 0%, transparent 60%),
+    radial-gradient(1000px 500px at 100% 0%, #131313 0%, transparent 50%),
+    var(--bg);
+  color:var(--text);
+  font-family:'Space Grotesk', system-ui, sans-serif;
+  overflow-x:hidden;
+  min-height:100vh;
+}
+.mono{font-family:'JetBrains Mono', monospace;}
+.display{font-family:'Orbitron', sans-serif;}
+button{font-family:inherit; cursor:pointer;}
+::selection{background:var(--yellow); color:#000;}
+::-webkit-scrollbar{width:8px; height:8px;}
+::-webkit-scrollbar-thumb{background:var(--border); border-radius:8px;}
+
+.screen{
+  display:none;
+  min-height:100vh;
+  width:100%;
+  animation: fadeIn .5s ease;
+}
+.screen.active{display:flex; flex-direction:column;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important;}
+}
+
+/* ---------- LOGO SCREEN ---------- */
+#logoScreen{
+  align-items:center; justify-content:center;
+  background:
+    repeating-linear-gradient(135deg, rgba(245,197,24,.04) 0 2px, transparent 2px 40px),
+    radial-gradient(800px 500px at 50% 30%, #1f1a08 0%, #000 70%);
+  position:relative;
+  text-align:center;
+  padding:24px;
+}
+.logo-wrap{ perspective:900px; }
+.coin3d{
+  width:150px; height:150px; margin:0 auto 18px;
+  position:relative;
+  transform-style:preserve-3d;
+  animation:spinCoin 3.2s linear infinite;
+}
+.coin-face{
+  position:absolute; inset:0; border-radius:50%;
+  background: radial-gradient(circle at 35% 30%, var(--yellow-bright), var(--yellow) 45%, var(--yellow-dark) 100%);
+  border:4px solid #000;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: inset 0 0 20px rgba(0,0,0,.4), 0 0 40px rgba(245,197,24,.35);
+  backface-visibility:hidden;
+}
+.coin-face span{
+  font-family:'Orbitron', sans-serif; font-weight:900; font-size:52px; color:#000;
+}
+.coin-face.back{ transform: rotateY(180deg); }
+@keyframes spinCoin{
+  from{ transform:rotateY(0deg); }
+  to{ transform:rotateY(360deg); }
+}
+.logo-title{
+  font-size:clamp(34px, 8vw, 64px);
+  letter-spacing:6px;
+  margin:6px 0 4px;
+  color:var(--yellow);
+  text-shadow: 0 0 18px rgba(245,197,24,.55), 0 0 2px #000;
+  animation:flicker 4s infinite;
+}
+@keyframes flicker{
+  0%,19%,21%,23%,25%,54%,56%,100%{opacity:1;}
+  20%,24%,55%{opacity:.75;}
+}
+.logo-sub{ color:var(--muted); letter-spacing:3px; font-size:13px; text-transform:uppercase; margin-bottom:34px;}
+.btn{
+  border:none; border-radius:10px; padding:14px 26px; font-weight:700; font-size:15px;
+  transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.btn:active{ transform:scale(.96); }
+.btn-primary{
+  background:linear-gradient(180deg, var(--yellow-bright), var(--yellow));
+  color:#111; box-shadow:0 6px 20px rgba(245,197,24,.3);
+}
+.btn-primary:hover{ filter:brightness(1.08); }
+.btn-ghost{
+  background:transparent; color:var(--text); border:1.5px solid var(--border);
+}
+.btn-ghost:hover{ border-color:var(--yellow); color:var(--yellow); }
+.btn-danger{ background:linear-gradient(180deg, #ff6b6b, var(--red)); color:#fff; }
+.btn-block{ width:100%; }
+.btn-sm{ padding:9px 14px; font-size:13px; border-radius:8px; }
+.particles{ position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+.particle{
+  position:absolute; bottom:-20px; width:4px; height:4px; border-radius:50%;
+  background:var(--yellow); opacity:.5;
+  animation:rise linear infinite;
+}
+@keyframes rise{
+  to{ transform:translateY(-110vh); opacity:0; }
+}
+
+/* ---------- AUTH SCREEN ---------- */
+#authScreen{ align-items:center; justify-content:center; padding:24px; }
+.auth-card{
+  width:100%; max-width:380px; background:var(--panel); border:1px solid var(--border);
+  border-radius:var(--radius); padding:26px; box-shadow:var(--shadow);
+}
+.auth-tabs{ display:flex; gap:6px; background:var(--bg-alt); padding:4px; border-radius:10px; margin-bottom:18px; }
+.auth-tab{
+  flex:1; text-align:center; padding:9px; border-radius:8px; font-weight:700; font-size:13px;
+  color:var(--muted); background:transparent; border:none; letter-spacing:.5px; text-transform:uppercase;
+}
+.auth-tab.active{ background:var(--yellow); color:#111; }
+.field{ margin-bottom:14px; }
+.field label{ display:block; font-size:12px; color:var(--muted); margin-bottom:6px; letter-spacing:.4px; text-transform:uppercase; }
+.field input{
+  width:100%; padding:12px 13px; border-radius:9px; border:1.5px solid var(--border);
+  background:var(--bg-alt); color:var(--text); font-size:14px; outline:none;
+}
+.field input:focus{ border-color:var(--yellow); }
+.field-hint{ font-size:11px; color:var(--muted); margin-top:5px; }
+.auth-msg{ font-size:13px; margin:10px 0; min-height:18px; }
+.auth-msg.err{ color:var(--red); }
+.auth-msg.ok{ color:var(--green); }
+.attempts-row{ display:flex; gap:6px; justify-content:center; margin-top:10px; }
+.attempt-dot{ width:9px; height:9px; border-radius:50%; background:var(--border); }
+.attempt-dot.used{ background:var(--red); }
+.back-link{ text-align:center; margin-top:14px; }
+.back-link a{ color:var(--muted); font-size:12px; cursor:pointer; text-decoration:underline; }
+
+/* ---------- APP SHELL ---------- */
+#appShell{ display:none; min-height:100vh; flex-direction:column; }
+#appShell.active{ display:flex; }
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:12px 16px; background:var(--bg-alt); border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:20;
+}
+.topbar-left{ display:flex; align-items:center; gap:10px; }
+.mini-coin{
+  width:28px; height:28px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, var(--yellow-bright), var(--yellow-dark));
+  border:2px solid #000; flex-shrink:0;
+}
+.brand{ font-family:'Orbitron'; font-weight:900; color:var(--yellow); font-size:15px; letter-spacing:1px;}
+.rank-pill{
+  display:flex; align-items:center; gap:6px; padding:5px 10px; border-radius:20px;
+  background:var(--panel); border:1px solid var(--border); font-size:11px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.5px;
+}
+.topbar-right{ display:flex; align-items:center; gap:14px; }
+.balance-chip{ text-align:right; }
+.balance-chip .val{ font-family:'JetBrains Mono'; font-weight:700; font-size:15px; }
+.balance-chip .lbl{ font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+
+.app-body{ flex:1; padding:16px; padding-bottom:90px; max-width:900px; width:100%; margin:0 auto; }
+
+.navbar{
+  position:fixed; bottom:0; left:0; right:0; z-index:30;
+  background:var(--bg-alt); border-top:1px solid var(--border);
+  display:flex; justify-content:space-around; padding:8px 4px calc(8px + env(safe-area-inset-bottom));
+}
+.nav-btn{
+  background:none; border:none; color:var(--muted); display:flex; flex-direction:column; align-items:center;
+  gap:3px; font-size:10px; padding:6px 4px; border-radius:8px; flex:1; max-width:90px; font-weight:600;
+  letter-spacing:.3px; text-transform:uppercase;
+}
+.nav-btn .ic{ font-size:19px; line-height:1; }
+.nav-btn.active{ color:var(--yellow); }
+
+.card{
+  background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+  padding:18px; margin-bottom:14px;
+}
+.card h2{ margin:0 0 4px; font-size:16px; display:flex; align-items:center; gap:8px; }
+.card .subtext{ color:var(--muted); font-size:12.5px; margin:0 0 14px; }
+.grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+@media (max-width:520px){ .grid-3{ grid-template-columns:repeat(2,1fr); } }
+
+.stat-box{ background:var(--bg-alt); border:1px solid var(--border); border-radius:10px; padding:12px; }
+.stat-box .lbl{ font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; }
+.stat-box .val{ font-family:'JetBrains Mono'; font-weight:700; font-size:17px; margin-top:4px; }
+.gain{ color:var(--green); }
+.loss{ color:var(--red); }
+
+/* Mining */
+.rig-wrap{ display:flex; flex-direction:column; align-items:center; padding:10px 0 6px; }
+.rig{
+  width:120px; height:120px; border-radius:18px; position:relative;
+  background:linear-gradient(160deg, #232327, #101012);
+  border:2px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: inset 0 0 25px rgba(0,0,0,.6);
+}
+.rig .pick{
+  font-size:46px; transform-origin:70% 90%;
+  animation:swing 1.1s ease-in-out infinite;
+}
+.rig.idle .pick{ animation:none; }
+@keyframes swing{
+  0%{ transform:rotate(-25deg); }
+  50%{ transform:rotate(35deg); }
+  100%{ transform:rotate(-25deg); }
+}
+.rig.mining{ box-shadow: inset 0 0 25px rgba(0,0,0,.6), 0 0 26px rgba(245,197,24,.35); }
+.heat-bar{ width:100%; max-width:280px; height:10px; border-radius:6px; background:var(--bg-alt); border:1px solid var(--border); overflow:hidden; margin-top:14px;}
+.heat-fill{ height:100%; background:linear-gradient(90deg, var(--green), var(--yellow), var(--red)); width:0%; transition:width .25s ease; }
+.intensity-row{ display:flex; gap:8px; justify-content:center; margin:16px 0; flex-wrap:wrap; }
+.intensity-btn{
+  padding:9px 14px; border-radius:9px; border:1.5px solid var(--border); background:var(--bg-alt); color:var(--muted); font-weight:700; font-size:13px;
+}
+.intensity-btn.active{ border-color:var(--yellow); color:var(--yellow); background:rgba(245,197,24,.08); }
+.progress-outer{ width:100%; max-width:280px; height:8px; background:var(--bg-alt); border-radius:6px; overflow:hidden; border:1px solid var(--border); margin-top:10px; }
+.progress-inner{ height:100%; width:0%; background:var(--yellow); transition:width .1s linear; }
+.log-list{ display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; margin-top:10px; }
+.log-item{ display:flex; justify-content:space-between; font-size:12.5px; padding:8px 10px; background:var(--bg-alt); border-radius:8px; border:1px solid var(--border); }
+
+/* Market */
+.coin-row{
+  display:flex; align-items:center; justify-content:space-between; padding:12px 10px;
+  border-bottom:1px solid var(--border); gap:10px; cursor:pointer; border-radius:8px;
+}
+.coin-row:hover{ background:var(--bg-alt); }
+.coin-row:last-child{ border-bottom:none; }
+.coin-id{ display:flex; align-items:center; gap:10px; }
+.coin-badge{
+  width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:12px; color:#000; flex-shrink:0;
+}
+.coin-name{ font-weight:700; font-size:13.5px; }
+.coin-sym{ color:var(--muted); font-size:11px; }
+.coin-price{ text-align:right; }
+.coin-price .p{ font-family:'JetBrains Mono'; font-weight:700; }
+.coin-price .chg{ font-size:11.5px; font-family:'JetBrains Mono'; }
+.spark{ width:70px; height:30px; }
+
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; align-items:center; justify-content:center;
+  z-index:100; padding:20px; backdrop-filter:blur(2px);
+}
+.modal-overlay.active{ display:flex; }
+.modal{
+  background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:22px;
+  width:100%; max-width:420px; max-height:88vh; overflow-y:auto; box-shadow:var(--shadow);
+}
+.modal h3{ margin:0 0 14px; display:flex; align-items:center; gap:8px; }
+.seg{ display:flex; background:var(--bg-alt); border-radius:9px; padding:4px; margin-bottom:14px; }
+.seg button{ flex:1; padding:8px; border:none; background:none; color:var(--muted); border-radius:7px; font-weight:700; font-size:13px; }
+.seg button.active{ background:var(--yellow); color:#111; }
+.company-opt{
+  display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:9px;
+  border:1.5px solid var(--border); margin-bottom:8px; background:var(--bg-alt);
+}
+.company-opt.selected{ border-color:var(--yellow); }
+.company-opt .name{ font-weight:700; font-size:13px; }
+.company-opt .meta{ font-size:11px; color:var(--muted); }
+.risk-tag{ font-size:10px; padding:2px 7px; border-radius:20px; font-weight:700; text-transform:uppercase; }
+.risk-Low{ background:var(--green-dim); color:var(--green); }
+.risk-Medium{ background:rgba(245,197,24,.15); color:var(--yellow); }
+.risk-High{ background:rgba(239,68,68,.15); color:#ff8f8f; }
+.risk-Extreme{ background:var(--red-dim); color:var(--red); }
+
+/* Achievements / collectibles */
+.badge-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(130px,1fr)); gap:12px; }
+.badge{
+  background:var(--bg-alt); border:1.5px solid var(--border); border-radius:12px; padding:14px 10px; text-align:center;
+  opacity:.4; filter:grayscale(1);
+}
+.badge.unlocked{ opacity:1; filter:none; border-color:var(--yellow); box-shadow:0 0 14px rgba(245,197,24,.15); }
+.badge .ic{ font-size:30px; margin-bottom:6px; }
+.badge .nm{ font-size:12px; font-weight:700; }
+.badge .ds{ font-size:10.5px; color:var(--muted); margin-top:3px; }
+.rarity{ display:inline-block; margin-top:6px; font-size:9px; padding:2px 6px; border-radius:8px; font-weight:800; letter-spacing:.4px; text-transform:uppercase; }
+.rarity-common{ background:#2a2a2e; color:#c8c8ce; }
+.rarity-rare{ background:#123a52; color:#5fc4ff; }
+.rarity-epic{ background:#3a1a52; color:#c98bff; }
+.rarity-legendary{ background:#4a3300; color:var(--yellow); }
+
+/* Portfolio */
+.tx-row{ display:flex; justify-content:space-between; align-items:center; padding:10px 4px; border-bottom:1px solid var(--border); font-size:12.5px; gap:8px;}
+.tx-row:last-child{ border:none; }
+.tx-left{ display:flex; flex-direction:column; }
+.tx-left .t1{ font-weight:700; }
+.tx-left .t2{ color:var(--muted); font-size:11px; }
+canvas.chart{ width:100%; height:160px; display:block; }
+
+.rank-track{ display:flex; align-items:center; gap:4px; margin-top:10px; }
+.rank-seg{ flex:1; height:6px; border-radius:4px; background:var(--border); }
+.rank-seg.filled{ background:var(--yellow); }
+
+.toast{
+  position:fixed; top:16px; left:50%; transform:translateX(-50%) translateY(-20px); z-index:200;
+  background:var(--panel); border:1px solid var(--yellow); color:var(--text); padding:12px 18px; border-radius:10px;
+  font-size:13px; font-weight:600; opacity:0; transition:all .3s ease; box-shadow:var(--shadow); max-width:90vw; text-align:center;
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+.confirm-box p{ font-size:13.5px; color:var(--muted); line-height:1.5; }
+.row-gap{ display:flex; gap:10px; margin-top:16px; }
+.section-title{ font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin:18px 0 8px; }
+.empty-state{ text-align:center; padding:26px 10px; color:var(--muted); font-size:13px; }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGO / TITLE SCREEN ================= -->
+<div id="logoScreen" class="screen active">
+  <div class="particles" id="particles"></div>
+  <div class="logo-wrap">
+    <div class="coin3d">
+      <div class="coin-face front"><span>₿</span></div>
+      <div class="coin-face back"><span>₿</span></div>
+    </div>
+    <div class="logo-title display">HASHRUSH</div>
+    <div class="logo-sub mono">Crypto Empire · Mining &amp; Trading Simulator</div>
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+      <button class="btn btn-primary" id="btnGoRegister">Create Account</button>
+      <button class="btn btn-ghost" id="btnGoLogin">Log In</button>
+    </div>
+    <div id="startMsg" class="auth-msg" style="text-align:center; margin-top:16px;"></div>
+  </div>
+</div>
+
+<!-- ================= AUTH SCREEN ================= -->
+<div id="authScreen" class="screen">
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab" id="tabLogin">Log In</button>
+      <button class="auth-tab" id="tabRegister">Register</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form id="loginForm" style="display:none;">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="loginUsername" autocomplete="username" placeholder="e.g. satoshi_jr">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Log In</button>
+      <div class="auth-msg" id="loginMsg"></div>
+      <div class="attempts-row" id="attemptsRow">
+        <div class="attempt-dot" data-i="0"></div>
+        <div class="attempt-dot" data-i="1"></div>
+        <div class="attempt-dot" data-i="2"></div>
+      </div>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form id="registerForm" style="display:none;">
+      <div class="field">
+        <label>Choose a username</label>
+        <input type="text" id="regUsername" autocomplete="username" placeholder="3-16 characters">
+      </div>
+      <div class="field">
+        <label>Choose a password</label>
+        <input type="password" id="regPassword" autocomplete="new-password" placeholder="At least 4 characters">
+        <div class="field-hint">Game account only — please don't reuse a real password. Account data for this game is stored in shared game storage.</div>
+      </div>
+      <div class="field">
+        <label>Confirm password</label>
+        <input type="password" id="regPassword2" autocomplete="new-password" placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Create Account &amp; Enter</button>
+      <div class="auth-msg" id="registerMsg"></div>
+    </form>
+
+    <div class="back-link"><a id="backToTitle">&larr; Back to title</a></div>
+  </div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div id="appShell">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="mini-coin"></div>
+      <div>
+        <div class="brand">HASHRUSH</div>
+        <div class="rank-pill" id="rankPill">🥉 BRONZE</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="balance-chip">
+        <div class="lbl">Net Worth</div>
+        <div class="val" id="netWorthChip">$0.00</div>
+      </div>
+      <div class="balance-chip">
+        <div class="lbl">Cash</div>
+        <div class="val" id="cashChip">$0.00</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-body" id="appBody"><!-- screen content injected here --></div>
+
+  <div class="navbar">
+    <button class="nav-btn" data-view="dashboard"><span class="ic">🏠</span>Home</button>
+    <button class="nav-btn" data-view="mine"><span class="ic">⛏️</span>Mine</button>
+    <button class="nav-btn" data-view="market"><span class="ic">📈</span>Market</button>
+    <button class="nav-btn" data-view="portfolio"><span class="ic">💼</span>Wallet</button>
+    <button class="nav-btn" data-view="achievements"><span class="ic">🏆</span>Awards</button>
+    <button class="nav-btn" data-view="settings"><span class="ic">⚙️</span>Settings</button>
+  </div>
+</div>
+
+<!-- ================= MODAL: TRADE ================= -->
+<div class="modal-overlay" id="tradeModalOverlay">
+  <div class="modal">
+    <h3><span id="tradeCoinBadge"></span> <span id="tradeCoinName"></span></h3>
+    <div class="seg" id="tradeSideSeg">
+      <button class="active" data-side="buy">Buy</button>
+      <button data-side="sell">Sell</button>
+    </div>
+    <div class="section-title">Choose exchange</div>
+    <div id="companyOptions"></div>
+    <div class="field">
+      <label id="amountLabel">Amount (USD)</label>
+      <input type="number" id="tradeAmount" min="0" step="any" placeholder="0.00">
+      <div class="field-hint" id="tradeHint"></div>
+    </div>
+    <div class="row-gap">
+      <button class="btn btn-ghost btn-block" id="btnCloseTrade">Cancel</button>
+      <button class="btn btn-primary btn-block" id="btnConfirmTrade">Confirm Trade</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: CONFIRM (reset/delete) ================= -->
+<div class="modal-overlay" id="confirmModalOverlay">
+  <div class="modal confirm-box">
+    <h3 id="confirmTitle">Are you sure?</h3>
+    <p id="confirmText"></p>
+    <div class="row-gap">
+      <button class="btn btn-ghost btn-block" id="btnCancelConfirm">Cancel</button>
+      <button class="btn btn-danger btn-block" id="btnDoConfirm">Yes, continue</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===================== CONSTANTS ===================== */
+const COIN_DEFS = {
+  BTC:{ name:'Bitcoin', color:'#f7931a', vol:0.012, start:65000 },
+  ETH:{ name:'Ethereum', color:'#8e9dff', vol:0.016, start:3400 },
+  LTC:{ name:'Litecoin', color:'#c0c9d6', vol:0.02, start:85 },
+  DOGE:{ name:'Dogecoin', color:'#f2c14e', vol:0.03, start:0.15 }
+};
+const COMPANIES = [
+  { id:'zenith', name:'Zenith Exchange', fee:0.001, risk:'Low', eventChance:0.04, bad:-0.03, good:0.02 },
+  { id:'nova', name:'NovaTrade Global', fee:0.0025, risk:'Medium', eventChance:0.09, bad:-0.09, good:0.06 },
+  { id:'quick', name:'QuickCoin Markets', fee:0.004, risk:'High', eventChance:0.16, bad:-0.22, good:0.18 },
+  { id:'obsidian', name:'Obsidian OTC', fee:0.006, risk:'Extreme', eventChance:0.26, bad:-0.42, good:0.4 }
+];
+const RANKS = [
+  { name:'Bronze', min:0, icon:'🥉' },
+  { name:'Silver', min:1000, icon:'🥈' },
+  { name:'Gold', min:10000, icon:'🥇' },
+  { name:'Platinum', min:50000, icon:'💠' },
+  { name:'Diamond', min:250000, icon:'💎' }
+];
+const ACHIEVEMENTS = [
+  { id:'first_mine', name:'First Steps', desc:'Successfully mine for the first time', ic:'⛏️', rarity:'common' },
+  { id:'first_trade', name:'Market Entry', desc:'Complete your first trade', ic:'📊', rarity:'common' },
+  { id:'big_miner', name:'Big Miner', desc:'Mine a total of 0.01 BTC', ic:'🪙', rarity:'rare' },
+  { id:'diversified', name:'Diversified Investor', desc:'Trade with all 4 exchanges', ic:'🌐', rarity:'rare' },
+  { id:'risk_taker', name:'Risk Taker', desc:'Trade with Obsidian OTC', ic:'🎲', rarity:'rare' },
+  { id:'rig_master', name:'Rig Master', desc:'Upgrade your mining rig to level 5', ic:'🛠️', rarity:'epic' },
+  { id:'century', name:'Century Club', desc:'Complete 100 trades', ic:'💯', rarity:'epic' },
+  { id:'gold_rank', name:'Golden Touch', desc:'Reach Gold rank', ic:'🥇', rarity:'epic' },
+  { id:'whale', name:'Whale Status', desc:'Reach a net worth of $50,000', ic:'🐋', rarity:'legendary' },
+  { id:'diamond_rank', name:'Legend', desc:'Reach Diamond rank', ic:'💎', rarity:'legendary' }
+];
+const COLLECTIBLES = [
+  { id:'c_pickaxe', name:'Golden Pickaxe', ic:'⛏️', rarity:'rare', req:'first_mine' },
+  { id:'c_bull', name:'Bull Statue', ic:'🐂', rarity:'epic', req:'first_trade' },
+  { id:'c_shard', name:'Genesis Shard', ic:'🔷', rarity:'legendary', req:'big_miner' },
+  { id:'c_bear', name:'Bear Trophy', ic:'🐻', rarity:'epic', req:'risk_taker' },
+  { id:'c_crown', name:'Empire Crown', ic:'👑', rarity:'legendary', req:'diamond_rank' },
+  { id:'c_chip', name:'Overclocked Chip', ic:'💾', rarity:'rare', req:'rig_master' },
+  { id:'c_globe', name:'Trader Globe', ic:'🌍', rarity:'rare', req:'diversified' },
+  { id:'c_medal', name:'Century Medal', ic:'🎖️', rarity:'epic', req:'century' }
+];
+const MAX_ATTEMPTS = 3;
+const MINE_COOLDOWN_MS = 2600;
+
+/* ===================== STATE ===================== */
+let session = { username:null, user:null };
+let loginAttempts = 0;
+let authMode = 'login';
+let currentView = 'dashboard';
+let priceTimer = null;
+let saveTimer = null;
+let mining = { active:false, cooldownUntil:0, intensity:2, heat:0 };
+let tradeCtx = { coin:null, side:'buy', companyId:'zenith' };
+let confirmCtx = { action:null };
+
+let market = {};
+Object.keys(COIN_DEFS).forEach(sym=>{
+  market[sym] = { price: COIN_DEFS[sym].start, history:[COIN_DEFS[sym].start], momentum:0 };
+});
+
+/* ===================== STORAGE HELPERS ===================== */
+function simpleHash(str){
+  let h = 0;
+  for(let i=0;i<str.length;i++){ h = (h<<5) - h + str.charCodeAt(i); h |= 0; }
+  return 'h' + Math.abs(h).toString(36);
+}
+
+// Three-tier storage: (1) Claude's persistent artifact storage when available
+// (syncs across sessions/devices within Claude), (2) the browser's localStorage
+// when running as a standalone downloaded file (persists on this device/browser
+// only), (3) in-memory as a last-resort fallback (this session only).
+const memStore = {};
+const LS_PREFIX = 'hashrush:';
+let storageBackend = 'unknown'; // 'persistent' | 'local' | 'memory'
+
+async function detectStorageBackend(){
+  if(storageBackend !== 'unknown') return storageBackend;
+  try{
+    if(window.storage && typeof window.storage.set === 'function'){
+      const r = await window.storage.set('__hashrush_probe__', '1', true);
+      if(r){ storageBackend = 'persistent'; return storageBackend; }
+    }
+  }catch(e){ /* fall through */ }
+  try{
+    const testKey = LS_PREFIX + '__probe__';
+    window.localStorage.setItem(testKey, '1');
+    window.localStorage.removeItem(testKey);
+    storageBackend = 'local';
+    return storageBackend;
+  }catch(e){ /* fall through */ }
+  storageBackend = 'memory';
+  return storageBackend;
+}
+
+async function loadUser(username){
+  const key = 'user:'+username.toLowerCase();
+  const backend = await detectStorageBackend();
+  try{
+    if(backend === 'persistent'){
+      const res = await window.storage.get(key, true);
+      return res ? JSON.parse(res.value) : null;
+    }
+    if(backend === 'local'){
+      const raw = window.localStorage.getItem(LS_PREFIX + key);
+      return raw ? JSON.parse(raw) : null;
+    }
+  }catch(e){ /* fall through to memory */ }
+  return memStore[key] ? JSON.parse(memStore[key]) : null;
+}
+async function saveUserNow(u){
+  const key = 'user:'+u.username.toLowerCase();
+  const payload = JSON.stringify(u);
+  const backend = await detectStorageBackend();
+  try{
+    if(backend === 'persistent'){
+      const result = await window.storage.set(key, payload, true);
+      if(!result) throw new Error('empty storage result');
+      return true;
+    }
+    if(backend === 'local'){
+      window.localStorage.setItem(LS_PREFIX + key, payload);
+      return true;
+    }
+  }catch(e){
+    console.error('storage save failed, using memory fallback', e);
+    storageBackend = 'memory';
+  }
+  memStore[key] = payload;
+  return true;
+}
+function queueSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{ if(session.user) saveUserNow(session.user); }, 500);
+}
+async function deleteUserAccount(username){
+  const key = 'user:'+username.toLowerCase();
+  const backend = await detectStorageBackend();
+  try{
+    if(backend === 'persistent') await window.storage.delete(key, true);
+    else if(backend === 'local') window.localStorage.removeItem(LS_PREFIX + key);
+  }catch(e){ /* ignore */ }
+  delete memStore[key];
+}
+
+function freshUser(username, password){
+  const holdings = {};
+  Object.keys(COIN_DEFS).forEach(sym=>{ holdings[sym] = { amount:0, avgCost:0 }; });
+  const companiesInvested = {};
+  COMPANIES.forEach(c=>{ companiesInvested[c.id] = { volume:0, pnl:0, trades:0 }; });
+  return {
+    username, passwordHash: simpleHash(password),
+    createdAt: Date.now(),
+    cash: 1000,
+    holdings,
+    rigLevel: 1,
+    totalMinedBTC: 0,
+    totalTrades: 0,
+    achievements: [],
+    collectibles: [],
+    companiesInvested,
+    transactions: [],
+    netWorthHistory: [{ t: Date.now(), v: 1000 }]
+  };
+}
+
+/* ===================== UTIL ===================== */
+function fmtUSD(n){
+  const sign = n < 0 ? '-' : '';
+  const abs = Math.abs(n);
+  return sign + '$' + abs.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+function fmtCoin(n, sym){
+  const dec = sym === 'BTC' ? 6 : (sym === 'ETH' ? 5 : 3);
+  return n.toFixed(dec) + ' ' + sym;
+}
+function fmtPct(n){
+  const sign = n >= 0 ? '+' : '';
+  return sign + (n*100).toFixed(2) + '%';
+}
+function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=> t.classList.remove('show'), 2600);
+}
+function coinMarketValue(){
+  let total = 0;
+  Object.keys(session.user.holdings).forEach(sym=>{
+    total += session.user.holdings[sym].amount * market[sym].price;
+  });
+  return total;
+}
+function netWorth(){
+  return session.user.cash + coinMarketValue();
+}
+function getRank(nw){
+  let r = RANKS[0];
+  for(const rank of RANKS){ if(nw >= rank.min) r = rank; }
+  return r;
+}
+function rankIndex(nw){ return RANKS.indexOf(getRank(nw)); }
+
+/* ===================== ACHIEVEMENTS ===================== */
+function unlockAchievement(id){
+  if(!session.user) return;
+  if(session.user.achievements.includes(id)) return;
+  session.user.achievements.push(id);
+  const a = ACHIEVEMENTS.find(x=>x.id===id);
+  showToast('🏆 Achievement unlocked: ' + (a ? a.name : id));
+  COLLECTIBLES.filter(c=>c.req===id).forEach(c=>{
+    if(!session.user.collectibles.includes(c.id)){
+      session.user.collectibles.push(c.id);
+      showToast('✨ Collectible earned: ' + c.name);
+    }
+  });
+}
+function checkAchievements(){
+  const u = session.user;
+  const nw = netWorth();
+  if(u.totalMinedBTC > 0) unlockAchievement('first_mine');
+  if(u.totalTrades > 0) unlockAchievement('first_trade');
+  if(u.totalMinedBTC >= 0.01) unlockAchievement('big_miner');
+  if(Object.values(u.companiesInvested).every(c=>c.trades>0)) unlockAchievement('diversified');
+  if(u.companiesInvested.obsidian && u.companiesInvested.obsidian.trades>0) unlockAchievement('risk_taker');
+  if(u.rigLevel >= 5) unlockAchievement('rig_master');
+  if(u.totalTrades >= 100) unlockAchievement('century');
+  if(nw >= 10000) unlockAchievement('gold_rank');
+  if(nw >= 50000) unlockAchievement('whale');
+  if(nw >= 250000) unlockAchievement('diamond_rank');
+}
+
+/* ===================== MARKET SIMULATION ===================== */
+function tickMarket(){
+  Object.keys(market).forEach(sym=>{
+    const def = COIN_DEFS[sym];
+    const m = market[sym];
+    m.momentum += (Math.random()-0.5) * 0.01;
+    m.momentum = clamp(m.momentum, -0.02, 0.02);
+    const shock = (Math.random()-0.5) * def.vol;
+    const change = shock + m.momentum;
+    m.price = Math.max(def.start*0.05, m.price * (1 + change));
+    m.history.push(m.price);
+    if(m.history.length > 60) m.history.shift();
+  });
+  if(currentView === 'market') renderMarket();
+  if(currentView === 'dashboard') renderDashboard();
+  updateTopbar();
+}
+
+function drawSpark(canvas, history, color){
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = canvas.clientWidth * 2;
+  const h = canvas.height = canvas.clientHeight * 2;
+  ctx.clearRect(0,0,w,h);
+  if(history.length < 2) return;
+  const min = Math.min(...history), max = Math.max(...history);
+  const range = (max-min) || 1;
+  ctx.beginPath();
+  history.forEach((p,i)=>{
+    const x = (i/(history.length-1)) * w;
+    const y = h - ((p-min)/range) * (h-6) - 3;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+}
+
+function drawLineChart(canvas, points){
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = canvas.clientWidth * 2;
+  const h = canvas.height = canvas.clientHeight * 2;
+  ctx.clearRect(0,0,w,h);
+  if(points.length < 2){
+    ctx.fillStyle = '#8f8f99';
+    ctx.font = '24px sans-serif';
+    ctx.fillText('Not enough data yet', 20, h/2);
+    return;
+  }
+  const vals = points.map(p=>p.v);
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const range = (max-min) || 1;
+  const first = vals[0], last = vals[vals.length-1];
+  const color = last >= first ? '#22c55e' : '#ef4444';
+
+  ctx.beginPath();
+  points.forEach((p,i)=>{
+    const x = (i/(points.length-1)) * w;
+    const y = h - ((p.v-min)/range) * (h-30) - 15;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.lineTo(w, h); ctx.lineTo(0,h); ctx.closePath();
+  const grad = ctx.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0, color + '55');
+  grad.addColorStop(1, color + '00');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  ctx.beginPath();
+  points.forEach((p,i)=>{
+    const x = (i/(points.length-1)) * w;
+    const y = h - ((p.v-min)/range) * (h-30) - 15;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3.5;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+}
+
+/* ===================== NAVIGATION ===================== */
+const screens = {
+  logo: document.getElementById('logoScreen'),
+  auth: document.getElementById('authScreen'),
+  app: document.getElementById('appShell')
+};
+function showTopScreen(name){
+  Object.values(screens).forEach(s=> s.classList.remove('active'));
+  screens[name].classList.add('active');
+}
+
+function goToView(view){
+  currentView = view;
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.view === view);
+  });
+  renderCurrentView();
+}
+function renderCurrentView(){
+  if(!session.user) return;
+  const body = document.getElementById('appBody');
+  if(currentView === 'dashboard') renderDashboard();
+  else if(currentView === 'mine') renderMine();
+  else if(currentView === 'market') renderMarket();
+  else if(currentView === 'portfolio') renderPortfolio();
+  else if(currentView === 'achievements') renderAchievements();
+  else if(currentView === 'settings') renderSettings();
+  updateTopbar();
+}
+
+function updateTopbar(){
+  if(!session.user) return;
+  const nw = netWorth();
+  const rank = getRank(nw);
+  document.getElementById('rankPill').textContent = rank.icon + ' ' + rank.name.toUpperCase();
+  document.getElementById('netWorthChip').textContent = fmtUSD(nw);
+  document.getElementById('netWorthChip').className = 'val';
+  document.getElementById('cashChip').textContent = fmtUSD(session.user.cash);
+}
+
+/* ===================== RENDER: DASHBOARD ===================== */
+function renderDashboard(){
+  const u = session.user;
+  const nw = netWorth();
+  const rank = getRank(nw);
+  const rIdx = rankIndex(nw);
+  const nextRank = RANKS[rIdx+1];
+  const holdingsRows = Object.keys(u.holdings).map(sym=>{
+    const h = u.holdings[sym];
+    if(h.amount <= 0) return '';
+    const val = h.amount * market[sym].price;
+    const pnl = (market[sym].price - h.avgCost) * h.amount;
+    return `<div class="stat-box">
+      <div class="lbl">${sym} Holdings</div>
+      <div class="val">${fmtCoin(h.amount, sym)}</div>
+      <div class="val ${pnl>=0?'gain':'loss'}" style="font-size:12px; margin-top:2px;">${fmtUSD(val)} · ${pnl>=0?'▲':'▼'} ${fmtUSD(Math.abs(pnl))}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('appBody').innerHTML = `
+    <div class="card">
+      <h2>👋 Welcome back, ${escapeHtml(u.username)}</h2>
+      <p class="subtext">Here's your empire at a glance.</p>
+      <div class="grid-3">
+        <div class="stat-box"><div class="lbl">Net Worth</div><div class="val">${fmtUSD(nw)}</div></div>
+        <div class="stat-box"><div class="lbl">Cash (USD)</div><div class="val">${fmtUSD(u.cash)}</div></div>
+        <div class="stat-box"><div class="lbl">Total Mined</div><div class="val">${fmtCoin(u.totalMinedBTC,'BTC')}</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>${rank.icon} Rank: ${rank.name}</h2>
+      <p class="subtext">${nextRank ? `${fmtUSD(nextRank.min - nw > 0 ? nextRank.min - nw : 0)} more net worth to reach ${nextRank.name}` : 'Maximum rank achieved!'}</p>
+      <div class="rank-track">
+        ${RANKS.map((r,i)=> `<div class="rank-seg ${i<=rIdx?'filled':''}"></div>`).join('')}
+      </div>
+    </div>
+
+    ${holdingsRows ? `<div class="card"><h2>💰 Your Coins</h2><div class="grid-2">${holdingsRows}</div></div>` : `
+    <div class="card">
+      <h2>💰 Your Coins</h2>
+      <div class="empty-state">You don't own any crypto yet. Head to <b>Mine</b> to earn your first BTC, or <b>Market</b> to buy in.</div>
+    </div>`}
+
+    <div class="card">
+      <h2>⚡ Quick Actions</h2>
+      <div class="row-gap">
+        <button class="btn btn-primary btn-block" id="qaMine">Start Mining</button>
+        <button class="btn btn-ghost btn-block" id="qaTrade">Open Market</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('qaMine').onclick = ()=> goToView('mine');
+  document.getElementById('qaTrade').onclick = ()=> goToView('market');
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ===================== RENDER: MINE ===================== */
+function renderMine(){
+  const u = session.user;
+  const upgradeCost = Math.round(50 * Math.pow(1.65, u.rigLevel-1));
+  document.getElementById('appBody').innerHTML = `
+    <div class="card">
+      <h2>⛏️ Mining Rig — Level ${u.rigLevel}</h2>
+      <p class="subtext">Higher intensity means bigger potential rewards, but a greater chance your rig fails to find a block — and can overheat.</p>
+      <div class="rig-wrap">
+        <div class="rig idle" id="rigBox"><div class="pick">⛏️</div></div>
+        <div class="heat-bar"><div class="heat-fill" id="heatFill"></div></div>
+        <div style="font-size:11px; color:var(--muted); margin-top:4px;">Heat level</div>
+        <div class="intensity-row" id="intensityRow">
+          ${[1,2,3,4,5].map(i=>`<button class="intensity-btn ${i===mining.intensity?'active':''}" data-i="${i}">Lv ${i}</button>`).join('')}
+        </div>
+        <div style="font-size:12.5px; color:var(--muted); text-align:center;" id="oddsText"></div>
+        <button class="btn btn-primary" id="mineBtn" style="margin-top:16px; width:220px;">⛏️ Mine Now</button>
+        <div class="progress-outer"><div class="progress-inner" id="mineProgress"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🔧 Rig Upgrade</h2>
+      <p class="subtext">Boosts hash power (bigger rewards) and stabilizes your success odds.</p>
+      <div class="row-gap">
+        <div class="stat-box" style="flex:1;"><div class="lbl">Next Level</div><div class="val">${u.rigLevel+1}</div></div>
+        <div class="stat-box" style="flex:1;"><div class="lbl">Cost</div><div class="val">${fmtUSD(upgradeCost)}</div></div>
+      </div>
+      <button class="btn btn-ghost btn-block" style="margin-top:12px;" id="upgradeBtn">Upgrade Rig</button>
+    </div>
+
+    <div class="card">
+      <h2>📜 Mining Log</h2>
+      <div class="log-list" id="mineLog"></div>
+    </div>
+  `;
+  updateOddsText();
+  renderMineLog();
+  document.getElementById('mineBtn').onclick = doMine;
+  document.getElementById('upgradeBtn').onclick = doUpgradeRig;
+  document.querySelectorAll('#intensityRow .intensity-btn').forEach(b=>{
+    b.onclick = ()=>{
+      mining.intensity = parseInt(b.dataset.i,10);
+      document.querySelectorAll('#intensityRow .intensity-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      updateOddsText();
+    };
+  });
+}
+
+function updateOddsText(){
+  const el = document.getElementById('oddsText');
+  if(!el) return;
+  const chance = successChance();
+  el.textContent = `Success chance: ${(chance*100).toFixed(0)}% · Reward scales with rig level ${session.user.rigLevel}`;
+}
+function successChance(){
+  const base = 0.95 - mining.intensity*0.08;
+  const bonus = (session.user.rigLevel-1) * 0.01;
+  return clamp(base + bonus, 0.1, 0.97);
+}
+function renderMineLog(){
+  const logEl = document.getElementById('mineLog');
+  if(!logEl) return;
+  const entries = session.user.transactions.filter(t=>t.kind==='mine').slice(-12).reverse();
+  logEl.innerHTML = entries.length ? entries.map(e=>`
+    <div class="log-item">
+      <span>${new Date(e.t).toLocaleTimeString()} · Lv${e.intensity}</span>
+      <span class="${e.success?'gain':'loss'}">${e.success ? '+'+e.amount.toFixed(6)+' BTC' : (e.overheat ? 'Rig overheated!' : 'No block found')}</span>
+    </div>
+  `).join('') : '<div class="empty-state">No mining activity yet.</div>';
+}
+
+function doMine(){
+  if(!session.user) return;
+  const now = Date.now();
+  if(now < mining.cooldownUntil) return;
+  const rig = document.getElementById('rigBox');
+  rig.classList.remove('idle'); rig.classList.add('mining');
+  const bar = document.getElementById('mineProgress');
+  const btn = document.getElementById('mineBtn');
+  btn.disabled = true;
+
+  let elapsed = 0;
+  const step = 60;
+  const timer = setInterval(()=>{
+    elapsed += step;
+    bar.style.width = clamp((elapsed/MINE_COOLDOWN_MS)*100,0,100) + '%';
+    if(elapsed >= MINE_COOLDOWN_MS){
+      clearInterval(timer);
+      finishMine();
+    }
+  }, step);
+
+  function finishMine(){
+    rig.classList.remove('mining'); rig.classList.add('idle');
+    bar.style.width = '0%';
+    btn.disabled = false;
+    mining.cooldownUntil = Date.now() + 250;
+
+    mining.heat = clamp(mining.heat + mining.intensity*12, 0, 100);
+    const heatFill = document.getElementById('heatFill');
+    if(heatFill) heatFill.style.width = mining.heat + '%';
+
+    let overheat = false;
+    if(mining.heat >= 100){
+      overheat = true;
+      mining.heat = 40;
+      showToast('🔥 Rig overheated! Cooling down...');
+    }
+
+    const chance = successChance();
+    const success = !overheat && Math.random() < chance;
+    let amount = 0;
+    if(success){
+      const base = 0.00004 + Math.random()*0.00008;
+      const rigMult = 1 + (session.user.rigLevel-1)*0.18;
+      amount = base * mining.intensity * rigMult;
+      session.user.holdings.BTC.amount += amount;
+      session.user.totalMinedBTC += amount;
+    }
+    session.user.transactions.push({ kind:'mine', t:Date.now(), intensity:mining.intensity, success, amount, overheat });
+    session.user.netWorthHistory.push({ t:Date.now(), v: netWorth() });
+    if(session.user.netWorthHistory.length > 200) session.user.netWorthHistory.shift();
+
+    checkAchievements();
+    renderMineLog();
+    updateTopbar();
+    queueSave();
+
+    setTimeout(()=>{
+      if(heatFill) mining.heat = clamp(mining.heat - 6, 0, 100), heatFill.style.width = mining.heat + '%';
+    }, 400);
+  }
+}
+
+function doUpgradeRig(){
+  const u = session.user;
+  const cost = Math.round(50 * Math.pow(1.65, u.rigLevel-1));
+  if(u.cash < cost){ showToast('Not enough cash to upgrade.'); return; }
+  u.cash -= cost;
+  u.rigLevel += 1;
+  showToast(`Rig upgraded to level ${u.rigLevel}!`);
+  checkAchievements();
+  renderMine();
+  updateTopbar();
+  queueSave();
+}
+
+/* ===================== RENDER: MARKET ===================== */
+function renderMarket(){
+  const rows = Object.keys(COIN_DEFS).map(sym=>{
+    const def = COIN_DEFS[sym];
+    const m = market[sym];
+    const prev = m.history.length>1 ? m.history[m.history.length-2] : m.price;
+    const chg = (m.price - prev)/prev;
+    return `
+    <div class="coin-row" data-sym="${sym}">
+      <div class="coin-id">
+        <div class="coin-badge" style="background:${def.color}">${sym[0]}</div>
+        <div>
+          <div class="coin-name">${def.name}</div>
+          <div class="coin-sym">${sym}</div>
+        </div>
+      </div>
+      <canvas class="spark" data-sym="${sym}"></canvas>
+      <div class="coin-price">
+        <div class="p">${sym==='DOGE' ? '$'+m.price.toFixed(4) : fmtUSD(m.price)}</div>
+        <div class="chg ${chg>=0?'gain':'loss'}">${fmtPct(chg)}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('appBody').innerHTML = `
+    <div class="card">
+      <h2>📈 Live Market</h2>
+      <p class="subtext">Prices update in real time. Tap a coin to trade.</p>
+      ${rows}
+    </div>
+    <div class="card">
+      <h2>🏦 Exchanges</h2>
+      <p class="subtext">Fees and risk vary by exchange — higher risk exchanges can swing your trade for better or worse.</p>
+      ${COMPANIES.map(c=>`
+        <div class="company-opt">
+          <div>
+            <div class="name">${c.name}</div>
+            <div class="meta">Fee ${(c.fee*100).toFixed(2)}% · Event chance ${(c.eventChance*100).toFixed(0)}%</div>
+          </div>
+          <span class="risk-tag risk-${c.risk}">${c.risk}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  Object.keys(COIN_DEFS).forEach(sym=>{
+    const c = document.querySelector(`canvas.spark[data-sym="${sym}"]`);
+    drawSpark(c, market[sym].history, COIN_DEFS[sym].color);
+  });
+  document.querySelectorAll('.coin-row').forEach(row=>{
+    row.onclick = ()=> openTradeModal(row.dataset.sym);
+  });
+}
+
+/* ===================== TRADE MODAL ===================== */
+function openTradeModal(sym){
+  tradeCtx.coin = sym;
+  tradeCtx.side = 'buy';
+  tradeCtx.companyId = 'zenith';
+  const def = COIN_DEFS[sym];
+  document.getElementById('tradeCoinBadge').innerHTML = `<span style="display:inline-flex;width:20px;height:20px;border-radius:50%;background:${def.color};vertical-align:middle;"></span>`;
+  document.getElementById('tradeCoinName').textContent = def.name + ' (' + sym + ')';
+  document.querySelectorAll('#tradeSideSeg button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.side==='buy');
+    b.onclick = ()=>{
+      tradeCtx.side = b.dataset.side;
+      document.querySelectorAll('#tradeSideSeg button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      renderTradeCompanyOptions();
+      updateAmountLabel();
+    };
+  });
+  renderTradeCompanyOptions();
+  updateAmountLabel();
+  document.getElementById('tradeAmount').value = '';
+  document.getElementById('tradeModalOverlay').classList.add('active');
+}
+function updateAmountLabel(){
+  const sym = tradeCtx.coin;
+  document.getElementById('amountLabel').textContent = tradeCtx.side==='buy' ? 'Amount to spend (USD)' : `Amount to sell (${sym})`;
+  const u = session.user;
+  if(tradeCtx.side==='buy'){
+    document.getElementById('tradeHint').textContent = `Available cash: ${fmtUSD(u.cash)}`;
+  }else{
+    document.getElementById('tradeHint').textContent = `Available: ${fmtCoin(u.holdings[sym].amount, sym)}`;
+  }
+}
+function renderTradeCompanyOptions(){
+  const box = document.getElementById('companyOptions');
+  box.innerHTML = COMPANIES.map(c=>`
+    <div class="company-opt ${tradeCtx.companyId===c.id?'selected':''}" data-id="${c.id}">
+      <div>
+        <div class="name">${c.name}</div>
+        <div class="meta">Fee ${(c.fee*100).toFixed(2)}% · Event chance ${(c.eventChance*100).toFixed(0)}%</div>
+      </div>
+      <span class="risk-tag risk-${c.risk}">${c.risk}</span>
+    </div>
+  `).join('');
+  box.querySelectorAll('.company-opt').forEach(el=>{
+    el.onclick = ()=>{
+      tradeCtx.companyId = el.dataset.id;
+      box.querySelectorAll('.company-opt').forEach(x=>x.classList.remove('selected'));
+      el.classList.add('selected');
+    };
+  });
+}
+document.getElementById('btnCloseTrade').onclick = ()=> document.getElementById('tradeModalOverlay').classList.remove('active');
+document.getElementById('btnConfirmTrade').onclick = executeTrade;
+
+function executeTrade(){
+  const u = session.user;
+  const sym = tradeCtx.coin;
+  const company = COMPANIES.find(c=>c.id===tradeCtx.companyId);
+  const raw = parseFloat(document.getElementById('tradeAmount').value);
+  if(!raw || raw <= 0){ showToast('Enter a valid amount.'); return; }
+
+  const price = market[sym].price;
+  let eventNote = '';
+  let eventMult = 0;
+  if(Math.random() < company.eventChance){
+    const isGood = Math.random() < 0.45;
+    eventMult = isGood ? (Math.random()*company.good) : (Math.random()*company.bad);
+    eventNote = isGood ? ` ⚡ ${company.name} pumped your trade!` : ` ⚠️ ${company.name} hit a rough patch on this trade.`;
+  }
+
+  if(tradeCtx.side === 'buy'){
+    const usdSpend = raw;
+    if(usdSpend > u.cash){ showToast('Not enough cash.'); return; }
+    const execPrice = price * (1 + company.fee - eventMult*0.5);
+    const coinAmount = usdSpend / execPrice;
+    const h = u.holdings[sym];
+    const newTotalCost = h.avgCost*h.amount + usdSpend;
+    h.amount += coinAmount;
+    h.avgCost = h.amount > 0 ? newTotalCost / h.amount : 0;
+    u.cash -= usdSpend;
+    u.companiesInvested[company.id].volume += usdSpend;
+    u.companiesInvested[company.id].trades += 1;
+    u.totalTrades += 1;
+    u.transactions.push({ kind:'trade', t:Date.now(), side:'buy', sym, usd:usdSpend, coinAmount, company:company.name, pnl:0 });
+    showToast(`Bought ${fmtCoin(coinAmount,sym)} via ${company.name}.${eventNote}`);
+  } else {
+    const coinAmount = raw;
+    const h = u.holdings[sym];
+    if(coinAmount > h.amount){ showToast('You do not have that much to sell.'); return; }
+    const execPrice = price * (1 - company.fee + eventMult*0.5);
+    const proceeds = coinAmount * execPrice;
+    const pnl = (execPrice - h.avgCost) * coinAmount;
+    h.amount -= coinAmount;
+    if(h.amount <= 0.0000001) h.amount = 0;
+    u.cash += proceeds;
+    u.companiesInvested[company.id].volume += proceeds;
+    u.companiesInvested[company.id].pnl += pnl;
+    u.companiesInvested[company.id].trades += 1;
+    u.totalTrades += 1;
+    u.transactions.push({ kind:'trade', t:Date.now(), side:'sell', sym, usd:proceeds, coinAmount, company:company.name, pnl });
+    showToast(`Sold ${fmtCoin(coinAmount,sym)} via ${company.name} · ${pnl>=0?'Gain':'Loss'} ${fmtUSD(Math.abs(pnl))}.${eventNote}`);
+  }
+
+  u.netWorthHistory.push({ t:Date.now(), v: netWorth() });
+  if(u.netWorthHistory.length > 200) u.netWorthHistory.shift();
+
+  checkAchievements();
+  document.getElementById('tradeModalOverlay').classList.remove('active');
+  updateTopbar();
+  renderCurrentView();
+  queueSave();
+}
+
+/* ===================== RENDER: PORTFOLIO ===================== */
+function renderPortfolio(){
+  const u = session.user;
+  const txs = u.transactions.slice().reverse().slice(0, 40);
+  const companyRows = COMPANIES.map(c=>{
+    const d = u.companiesInvested[c.id];
+    if(d.trades === 0) return '';
+    return `<div class="tx-row">
+      <div class="tx-left"><div class="t1">${c.name}</div><div class="t2">${d.trades} trades · Volume ${fmtUSD(d.volume)}</div></div>
+      <div class="${d.pnl>=0?'gain':'loss'} mono">${d.pnl>=0?'+':''}${fmtUSD(d.pnl)}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('appBody').innerHTML = `
+    <div class="card">
+      <h2>💼 Net Worth Over Time</h2>
+      <canvas class="chart" id="nwChart"></canvas>
+    </div>
+    <div class="card">
+      <h2>🏢 Companies You've Traded With</h2>
+      ${companyRows || '<div class="empty-state">No trades yet — visit the Market to get started.</div>'}
+    </div>
+    <div class="card">
+      <h2>🧾 Transaction History</h2>
+      <div style="max-height:320px; overflow-y:auto;">
+      ${txs.length ? txs.map(tx=>{
+        if(tx.kind==='mine'){
+          return `<div class="tx-row">
+            <div class="tx-left"><div class="t1">Mining (Lv${tx.intensity})</div><div class="t2">${new Date(tx.t).toLocaleString()}</div></div>
+            <div class="${tx.success?'gain':'loss'} mono">${tx.success? '+'+tx.amount.toFixed(6)+' BTC' : (tx.overheat?'Overheat':'Miss')}</div>
+          </div>`;
+        }
+        const pnlStr = tx.side==='sell' ? `${tx.pnl>=0?'+':''}${fmtUSD(tx.pnl)}` : `${fmtCoin(tx.coinAmount, tx.sym)}`;
+        return `<div class="tx-row">
+          <div class="tx-left"><div class="t1">${tx.side==='buy'?'Bought':'Sold'} ${tx.sym} · ${tx.company}</div><div class="t2">${new Date(tx.t).toLocaleString()}</div></div>
+          <div class="${tx.side==='sell' ? (tx.pnl>=0?'gain':'loss') : ''} mono">${pnlStr}</div>
+        </div>`;
+      }).join('') : '<div class="empty-state">No transactions yet.</div>'}
+      </div>
+    </div>
+  `;
+  drawLineChart(document.getElementById('nwChart'), u.netWorthHistory);
+}
+
+/* ===================== RENDER: ACHIEVEMENTS ===================== */
+function renderAchievements(){
+  const u = session.user;
+  document.getElementById('appBody').innerHTML = `
+    <div class="card">
+      <h2>🏆 Achievements</h2>
+      <p class="subtext">${u.achievements.length} / ${ACHIEVEMENTS.length} unlocked</p>
+      <div class="badge-grid">
+        ${ACHIEVEMENTS.map(a=>{
+          const unlocked = u.achievements.includes(a.id);
+          return `<div class="badge ${unlocked?'unlocked':''}">
+            <div class="ic">${a.ic}</div>
+            <div class="nm">${a.name}</div>
+            <div class="ds">${a.desc}</div>
+            <span class="rarity rarity-${a.rarity}">${a.rarity}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <h2>✨ Collectibles</h2>
+      <p class="subtext">${u.collectibles.length} / ${COLLECTIBLES.length} collected</p>
+      <div class="badge-grid">
+        ${COLLECTIBLES.map(c=>{
+          const unlocked = u.collectibles.includes(c.id);
+          return `<div class="badge ${unlocked?'unlocked':''}">
+            <div class="ic">${c.ic}</div>
+            <div class="nm">${c.name}</div>
+            <span class="rarity rarity-${c.rarity}">${c.rarity}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+/* ===================== RENDER: SETTINGS ===================== */
+function renderSettings(){
+  const u = session.user;
+  document.getElementById('appBody').innerHTML = `
+    <div class="card">
+      <h2>⚙️ Account</h2>
+      <div class="stat-box"><div class="lbl">Username</div><div class="val">${escapeHtml(u.username)}</div></div>
+      <div class="stat-box" style="margin-top:10px;">
+        <div class="lbl">Save Mode</div>
+        <div class="val" style="font-size:13px;">${
+          storageBackend==='persistent' ? '✅ Cloud (synced across devices via Claude)' :
+          storageBackend==='local' ? '💾 Saved on this browser/device only' :
+          '⚠️ Session only (resets on reload)'
+        }</div>
+      </div>
+      <div class="row-gap">
+        <button class="btn btn-ghost btn-block" id="btnLogout">Log Out</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>⚠️ Danger Zone</h2>
+      <p class="subtext">These actions cannot be undone.</p>
+      <div class="row-gap">
+        <button class="btn btn-danger btn-block" id="btnReset">Reset Progress</button>
+        <button class="btn btn-danger btn-block" id="btnDelete">Delete Account</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('btnLogout').onclick = doLogout;
+  document.getElementById('btnReset').onclick = ()=> openConfirm('reset');
+  document.getElementById('btnDelete').onclick = ()=> openConfirm('delete');
+}
+
+function openConfirm(action){
+  confirmCtx.action = action;
+  const title = action==='reset' ? 'Reset your progress?' : 'Delete your account?';
+  const text = action==='reset'
+    ? 'This will reset your cash, holdings, rig level, achievements, and history back to a fresh start. Your username and password stay the same.'
+    : 'This will permanently delete your account and all game data. This cannot be undone.';
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmText').textContent = text;
+  document.getElementById('confirmModalOverlay').classList.add('active');
+}
+document.getElementById('btnCancelConfirm').onclick = ()=> document.getElementById('confirmModalOverlay').classList.remove('active');
+document.getElementById('btnDoConfirm').onclick = async ()=>{
+  if(confirmCtx.action==='reset'){
+    const username = session.user.username;
+    const passwordHash = session.user.passwordHash;
+    session.user = freshUser(username, 'x');
+    session.user.passwordHash = passwordHash;
+    await saveUserNow(session.user);
+    showToast('Progress reset. Fresh start!');
+    document.getElementById('confirmModalOverlay').classList.remove('active');
+    goToView('dashboard');
+  } else if(confirmCtx.action==='delete'){
+    await deleteUserAccount(session.user.username);
+    document.getElementById('confirmModalOverlay').classList.remove('active');
+    showToast('Account deleted.');
+    doLogout(true);
+  }
+};
+
+/* ===================== AUTH FLOW ===================== */
+function setAuthMode(mode){
+  authMode = mode;
+  document.getElementById('tabLogin').classList.toggle('active', mode==='login');
+  document.getElementById('tabRegister').classList.toggle('active', mode==='register');
+  document.getElementById('loginForm').style.display = mode==='login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = mode==='register' ? 'block' : 'none';
+  document.getElementById('loginMsg').textContent = '';
+  document.getElementById('registerMsg').textContent = '';
+}
+document.getElementById('tabLogin').onclick = ()=> setAuthMode('login');
+document.getElementById('tabRegister').onclick = ()=> setAuthMode('register');
+document.getElementById('btnGoLogin').onclick = ()=>{ loginAttempts=0; renderAttemptsDots(); showTopScreen('auth'); setAuthMode('login'); };
+document.getElementById('btnGoRegister').onclick = ()=>{ showTopScreen('auth'); setAuthMode('register'); };
+document.getElementById('backToTitle').onclick = ()=> showTopScreen('logo');
+
+function renderAttemptsDots(){
+  document.querySelectorAll('.attempt-dot').forEach((d,i)=>{
+    d.classList.toggle('used', i < loginAttempts);
+  });
+}
+
+document.getElementById('registerForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const username = document.getElementById('regUsername').value.trim();
+  const pw = document.getElementById('regPassword').value;
+  const pw2 = document.getElementById('regPassword2').value;
+  const msg = document.getElementById('registerMsg');
+  msg.className = 'auth-msg';
+
+  if(username.length < 3 || username.length > 16 || !/^[a-zA-Z0-9_]+$/.test(username)){
+    msg.textContent = 'Username must be 3-16 characters (letters, numbers, underscore).';
+    msg.classList.add('err'); return;
+  }
+  if(pw.length < 4){
+    msg.textContent = 'Password must be at least 4 characters.';
+    msg.classList.add('err'); return;
+  }
+  if(pw !== pw2){
+    msg.textContent = 'Passwords do not match.';
+    msg.classList.add('err'); return;
+  }
+  msg.textContent = 'Creating account...';
+  msg.classList.add('ok');
+  const existing = await loadUser(username);
+  if(existing){
+    msg.textContent = 'That username is already taken.';
+    msg.className = 'auth-msg err'; return;
+  }
+  const user = freshUser(username, pw);
+  const ok = await saveUserNow(user);
+  if(!ok){
+    msg.textContent = 'Could not create account. Please try again.';
+    msg.className = 'auth-msg err'; return;
+  }
+  session.username = username;
+  session.user = user;
+  enterApp();
+});
+
+document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const username = document.getElementById('loginUsername').value.trim();
+  const pw = document.getElementById('loginPassword').value;
+  const msg = document.getElementById('loginMsg');
+  msg.className = 'auth-msg';
+  msg.textContent = 'Checking credentials...';
+
+  const user = await loadUser(username);
+  const hash = simpleHash(pw);
+  if(user && user.passwordHash === hash){
+    msg.classList.add('ok');
+    msg.textContent = 'Success! Loading your empire...';
+    session.username = username;
+    session.user = user;
+    setTimeout(enterApp, 400);
+    return;
+  }
+
+  loginAttempts += 1;
+  renderAttemptsDots();
+  const remaining = MAX_ATTEMPTS - loginAttempts;
+  if(remaining > 0){
+    msg.classList.add('err');
+    msg.textContent = `Invalid username or password. ${remaining} attempt${remaining===1?'':'s'} remaining.`;
+  } else {
+    msg.classList.add('err');
+    msg.textContent = 'Too many failed attempts. Returning to title screen...';
+    setTimeout(()=>{
+      loginAttempts = 0;
+      renderAttemptsDots();
+      document.getElementById('loginForm').reset();
+      msg.textContent = '';
+      showTopScreen('logo');
+      document.getElementById('startMsg').textContent = 'Login locked after 3 failed attempts. Please try again.';
+      document.getElementById('startMsg').className = 'auth-msg err';
+    }, 1600);
+  }
+});
+
+/* ===================== APP LIFECYCLE ===================== */
+function enterApp(){
+  showTopScreen('app');
+  document.getElementById('appShell').classList.add('active');
+  mining = { active:false, cooldownUntil:0, intensity:2, heat:0 };
+  goToView('dashboard');
+  if(priceTimer) clearInterval(priceTimer);
+  priceTimer = setInterval(tickMarket, 2500);
+}
+function doLogout(skipSave){
+  if(priceTimer) clearInterval(priceTimer);
+  if(!skipSave && session.user) saveUserNow(session.user);
+  session = { username:null, user:null };
+  document.getElementById('appShell').classList.remove('active');
+  document.getElementById('loginForm').reset();
+  document.getElementById('registerForm').reset();
+  loginAttempts = 0;
+  document.getElementById('startMsg').textContent = '';
+  showTopScreen('logo');
+}
+
+document.querySelectorAll('.nav-btn').forEach(b=>{
+  b.onclick = ()=> goToView(b.dataset.view);
+});
+
+/* ===================== PARTICLES (logo screen) ===================== */
+function spawnParticles(){
+  const box = document.getElementById('particles');
+  for(let i=0;i<26;i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random()*100 + '%';
+    p.style.animationDuration = (6+Math.random()*8) + 's';
+    p.style.animationDelay = (Math.random()*8) + 's';
+    p.style.opacity = (0.2+Math.random()*0.5).toFixed(2);
+    box.appendChild(p);
+  }
+}
+spawnParticles();
+setAuthMode('login');
+renderAttemptsDots();
+
+})();
+</script>
+</body>
+</html>
