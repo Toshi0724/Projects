@@ -13,10 +13,3 @@ IT Support — Hardware, software, and system troubleshooting
 IoT — Arduino, Raspberry Pi, ESP32, sensors, and automation
 Game Development — Survival, mystery, exploration, and interactive systems
 Development — Python, SQL, and web technologies
-
-Featured Project
-
-BOTCOIN — IoT Reverse Vending Machine**
-
-An embedded system that combines an Arduino, a Raspberry Pi, a dedicated camera, sensors, computer vision, and a database to automate PET bottle collection and rewards.
-
