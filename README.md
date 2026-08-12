@@ -1,6 +1,6 @@
 Hi, I'm Lean
 
-IT Support • Networking • IoT • Game Development
+IT Support | Networking | IoT | Game Development
 
 I build things, break things, and figure out how to make them work again.
 
